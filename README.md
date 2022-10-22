@@ -18,36 +18,44 @@ Other Comments
 - Another 12% of the mark will be assigned for both the documentation and the quality of your source code. 
 - 4% of the mark is assigned for the quality of your group coordination and the project break-down between partners.
 
---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
-TASK!
+**TASK!**
 ------------
 Login Screen
 ------------
-*The first screen of your system should provide options for both users and artists to login. 
-*Both class of users should be able to login using a valid id (respectively denoted as uid and aid for users and artists) and a password, denoted with pwd.  
-*After a successful login, the system should detect whether it is a user or an artist and provide the proper menus as discussed next. If the entered id is a valid id in both users and artists tables, then the user will be asked if they want to login as a user or as an artist.
+- The first screen of your system should provide options for both users and artists to login. 
+- Both class of users should be able to login using a valid id (respectively denoted as uid and aid for users and artists) and a password, denoted with pwd.  
+- After a successful login, the system should detect whether it is a user or an artist and provide the proper menus as discussed next. If the entered id is a valid id in both users and artists tables, then the user will be asked if they want to login as a user or as an artist.
 
-*Unregistered users should be able to sign up by providing a unique uid and additionally a name, and a password. Passwords are not encrypted in this project. 
-*After a successful signup, users should be able to perform the subsequent user operations (possibly chosen from a menu) as discussed next. 
-*Artists cannot sign up through your system (and you assume they are already in the database).
+- Unregistered users should be able to sign up by providing a unique uid and additionally a name, and a password. Passwords are not encrypted in this project. 
+- After a successful signup, users should be able to perform the subsequent user operations (possibly chosen from a menu) as discussed next. 
+- Artists cannot sign up through your system (and you assume they are already in the database).
 
-*Users should be able to logout, which directs them to the first screen of the system. There must be also an option to exit the program directly. 
-*When exiting the program, any session that is still open should be closed automatically.
+- Users should be able to logout, which directs them to the first screen of the system. There must be also an option to exit the program directly. 
+- When exiting the program, any session that is still open should be closed automatically.
 
 ----------------------
 System Functionalities
 ----------------------
-*After a successful login, users should be able to perform all of the following tasks:
+After a successful login, users should be able to perform all of the following tasks:
 
-    1. Start a session. The user should be able to start a session. For each session, a session number unique for the user should be assigned by your system, the session start date should be set to the current date and the session end date should be set to null.
-    2. Search for songs and playlists. The user should be able to provide one or more unique keywords, and the system should retrieve all songs and playlists that have any of those keywords in title. For each matching song, the id, the title and the duration, and 
-       for each matching playlist, the id, the title and the total duration of songs in the playlist should be returned. Each row of the result should indicate if it is a song or a playlist. The result should be ordered based on the number of matching keywords with 
-       songs/playlists that match the largest number of keywords listed on top. If there are more than 5 matching songs/playlists, at most 5 matches will be shown at a time, letting the user either select a match or see the rest of the matches in a paginated downward format. 
-       If a playlist is selected, the id, the title and the duration of all songs in the playlist should be listed. Any time a list of songs are displayed, the user should be able to select a song and perform a song action as discussed next. 
-    3. Search for artists. The user should be able to provide one or more unique keywords, and the system should retrieve all artists that have any of those keywords either in their names or in the title of a song they have performed. For each matching artist, the name, the 
-       nationality and the number of songs performed are returned. The result should be ordered based on the number of matching keywords with artists that match the largest number of keywords listed on top. If there are more than 5 matching artists, at most 5 matches will be 
-       shown at a time, letting the user either select a match for more information or see the rest of the matches in a paginated downward format. The user should be able to select an artist and see the id, the title and the duration of all their songs. Any time a list of songs 
+    1. Start a session. The user should be able to start a session. For each session, a session number unique for the user should be assigned by your system, the 
+       session start date should be set to the current date and the session end date should be set to null.
+    2. Search for songs and playlists. The user should be able to provide one or more unique keywords, and the system should retrieve all songs and playlists that have 
+       any of those keywords in title. For each matching song, the id, the title and the duration, and 
+       for each matching playlist, the id, the title and the total duration of songs in the playlist should be returned. Each row of the result should indicate if it 
+       is a song or a playlist. The result should be ordered based on the number of matching keywords with 
+       songs/playlists that match the largest number of keywords listed on top. If there are more than 5 matching songs/playlists, at most 5 matches will be shown at a 
+       time, letting the user either select a match or see the rest of the matches in a paginated downward format. 
+       If a playlist is selected, the id, the title and the duration of all songs in the playlist should be listed. Any time a list of songs are displayed, the user 
+       should be able to select a song and perform a song action as discussed next. 
+    3. Search for artists. The user should be able to provide one or more unique keywords, and the system should retrieve all artists that have any of those keywords 
+       either in their names or in the title of a song they have performed. For each matching artist, the name, the 
+       nationality and the number of songs performed are returned. The result should be ordered based on the number of matching keywords with artists that match the 
+       largest number of keywords listed on top. If there are more than 5 matching artists, at most 5 matches will be 
+       shown at a time, letting the user either select a match for more information or see the rest of the matches in a paginated downward format. The user should be 
+       able to select an artist and see the id, the title and the duration of all their songs. Any time a list of songs 
        are displayed, the user should be able to select a song and perform a song action as discussed next. 
     4. End the session. The user should be able to end the current session. This should be recorded with the end date/time set to the current date/time. 
     
