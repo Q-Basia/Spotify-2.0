@@ -23,14 +23,14 @@ Database Specification
 ----------------------
 You are given the following relational schema.
 
-users(uid, name, pwd)
-songs(sid, title, duration)
-sessions(uid, sno, start, end)
-listen(uid, sno, sid, cnt)
-playlists(pid, title, uid)
-plinclude(pid, sid, sorder)
-artists(aid, name, nationality, pwd)
-perform(aid, sid)
+- users(uid, name, pwd)
+- songs(sid, title, duration)
+- sessions(uid, sno, start, end)
+- listen(uid, sno, sid, cnt)
+- playlists(pid, title, uid)
+- plinclude(pid, sid, sorder)
+- artists(aid, name, nationality, pwd)
+- perform(aid, sid)
 
 These tables are derived from the specification of Assignment 1 and are identical to those in Assignment 2 except the tables users and artists, which have now a field for password (referred to as pwd). Use the given schema in your project and do not change any table/column names.
 
