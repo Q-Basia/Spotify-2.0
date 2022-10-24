@@ -18,6 +18,22 @@ Other Comments
 - Another 12% of the mark will be assigned for both the documentation and the quality of your source code. 
 - 4% of the mark is assigned for the quality of your group coordination and the project break-down between partners.
 
+----------------------
+Database Specification
+----------------------
+You are given the following relational schema.
+
+users(uid, name, pwd)
+songs(sid, title, duration)
+sessions(uid, sno, start, end)
+listen(uid, sno, sid, cnt)
+playlists(pid, title, uid)
+plinclude(pid, sid, sorder)
+artists(aid, name, nationality, pwd)
+perform(aid, sid)
+
+These tables are derived from the specification of Assignment 1 and are identical to those in Assignment 2 except the tables users and artists, which have now a field for password (referred to as pwd). Use the given schema in your project and do not change any table/column names.
+
 -----------------------------------------------------------------------------------------------------------------------------------------------------------------------
 
 **TASK!**
