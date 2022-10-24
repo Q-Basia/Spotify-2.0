@@ -8,3 +8,4 @@ ROOT = tk.TK()
 ROOT.withdraw()
 
 user_type = simpledialog.askstring(title = "Song management", prompt = "Are you a user or an artist")
+print("Testing GitHub")
