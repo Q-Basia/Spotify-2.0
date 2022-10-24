@@ -8,11 +8,14 @@ from tkinter import messagebox
 connection = None
 cursor = None
 
-root = tkinter.Tk() 
-root.title("welcome")
-root.geometry("200x100")
+def startSession():
+    root = tkinter.Tk() 
+    root.title("welcome")
+    root.geometry("200x100")
+    s = Button(root, text = "Start session", command = startSession, activeforeground="red", activebackground="pink", pady=10)
+    s.pack(side = "top")
+    root.mainloop()
 
-    
 def connect(path):
     global connection, cursor
 
@@ -20,13 +23,35 @@ def connect(path):
     cursor = connection.cursor()
     return
 
+def passwordValidate():
+    print("you're in")
+    
+#this function will create and take the user id and password
+def login():
+    loginWindow = Tk()
+    loginWindow.geometry("400x250")
+    loginWindow.title("Music is cool") #title of the page
+    
+    #create the username input box 
+    usernameLabel = Label(loginWindow, text = "User ID").grid(row=0, column=0)
+    username = StringVar();
+    usernameEntry = Entry(loginWindow, textvariable = username).grid(row=0, column=1)
+    
+    #creating the password input box 
+    passwordLabel = Label(loginWindow, text = "Password").grid(row=1, column=0)
+    password = StringVar();
+    passwordEntry = Entry(loginWindow, textvariable = password, show="*").grid(row=1, column=1)
+    
+    #creating the login button to press after having written the user ID and the password
+    loginButton = Button(loginWindow, text = "login", command=lambda: [passwordValidate, loginWindow.destroy()]).grid(row=4, column=0)
+    loginWindow.mainloop()
+    return
+
 def startSession():
     tkinter.messagebox.showinfo("session", "A new listening session has been started")
 
 
-s = Button(root, text = "Start session", command = startSession, activeforeground="red", activebackground="pink", pady=10)
-s.pack(side = "top")
-root.mainloop()
+
 
 
 def main():
@@ -38,9 +63,7 @@ def main():
     #connect to the database
     connect(path) 
     '''
+    login()
     
-    #page.withdraw()
-
-    #user_type = simpledialog.askstring(title = "Song management", prompt = "Are you a user or an artist")
-    #print(user_type)
-    
+if __name__ == "__main__":
+    main()
