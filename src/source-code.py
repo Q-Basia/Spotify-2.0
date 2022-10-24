@@ -88,7 +88,9 @@ def connect(path):
     return
 
 def main():
-    path = "./project1.db"
+    path_in = input()
+    path = "./" + path_in
+    print(path)
     connect(path)
     ROOT = tk.Tk()
 
