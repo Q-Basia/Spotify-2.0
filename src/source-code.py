@@ -3,6 +3,7 @@ import sqlite3
 import tkinter 
 from tkinter import *
 from tkinter import messagebox
+import sys # used to access the command line arguments
 #from tkinter import simpledialog
 
 connection = None
@@ -72,6 +73,73 @@ def login():
     loginWindow.mainloop()
     return
 
+def startSession():
+    tkinter.messagebox.showinfo("session", "A new listening session has been started")
+
+def searchInDB(keywords):
+    # Arguments: 
+    #   keywords: an array of string containing the keywords of the search
+    # Returns:
+    #   result: a sorted list of tuples
+
+    # Initialize the function that will calculate the keywords in sql
+    connection.create_function('countKeywords', 2, countKeywords )
+    # Create the list of tuples that we will return and contains all the songs and playlists
+    result = []
+
+    # Find matching songs
+    cursor.execute('''
+    SELECT sid, title, duration, countKeywords(title,:keywords)
+    FROM songs s
+    WHERE countKeywords(title,:keywords) > 0;
+    ''',{"keywords":keywords})
+
+    # Store all matching songs in the result
+    rows = cursor.fetchall()
+    for row in rows:
+        result.append(("Songs",row[0],row[1], row[2], row[3]))
+
+    # Find matching playlists 
+    cursor.execute('''
+    SELECT p.pid, p.title, SUM(l.cnt*s.duration), countKeywords(title, :keywords)
+    FROM playlists p
+    LEFT OUTER JOIN plinclude pl USING(pid)
+    LEFT OUTER JOIN songs s USING(sid)
+    WHERE countKeywords(title, :keywords) > 0
+    GROUP BY p.pid, p.title;
+    ''', {"keywords":keywords})
+
+    # Store all matching playlists in the result
+    rows = cursor.fetchall()
+    for row in rows:
+        result.append(("Playlist",row[0],row[1], row[2], row[3]))
+
+    # Return all of the matching songs and playlists
+    # Format of each entry of result: (Type, id, title, duration, number of keywords)
+    return result
+    
+
+def countKeywords(title, keywords):
+    # Arguments:
+    #   title: A string indicating the title of a song
+    #   keywords: an array of strings containing the keywords of a search
+    # Returns:
+    #   count: number of keywords in the title
+
+    count = 0 # number of keywords
+
+    # For each keyword, we check if it appears in the title
+    # Note: the comparison is not case-sensitive
+    for keyword in keywords:
+        for word in title.split():
+            if(keyword.lower() == word.lower()):
+                count += 1
+
+    # return how many keywords were in title
+    return count
+
+
+
 
 def main():
     '''
@@ -82,6 +150,9 @@ def main():
     #connect to the database
     connect(path) 
     '''
+    # We connect to the database
+    # We assumes that the database is in the same folder as the program
+    connect("./" + sys.argv[1])
     login()
     
 if __name__ == "__main__":
