@@ -33,17 +33,14 @@ def passwordValidate(ID, p):
     
     print(ID.get(), p.get())
     
-def idValidate(current_id):
+def idValidate(current_id, current_pass):
     global connection, cursor
     cursor.excecute('''SELECT u.uid FROM users u, artists a
                     WHERE u.uid = a.aid''')
     all_ids = cursor.fetchall()
-    
     for id in all_ids:
         if(id == current_id):
-            choose()
-    
-    cursor.execute()
+            choose(current_id, current_pass)
     
     
 #this function will create and take the user id and password
