@@ -71,6 +71,61 @@ def reset():
     id = ""
     ps = ""
     
+def registerPage():
+    global window, connection, cursor, id, ps
+    regFrame = Frame(window)
+    regFrame.pack()
+    
+    def newId(i, p1, p2, n):
+        cursor.execute(f"SELECT uid FROM users WHERE uid = '{i}';")
+        inside = cursor.fetchone()
+        if not i or not p1 or not p2 or not n:
+            noMatch.grid_remove()
+            inUse.grid_remove()
+            enterAll.grid(row=6, column =0)
+        elif inside:
+            enterAll.grid_remove()
+            noMatch.grid_remove()
+            inUse.grid(row=6, column =0)
+        elif p1 != p2:
+            enterAll.grid_remove()
+            inUse.grid_remove()
+            noMatch.grid(row=6, column =0)
+        else:
+            noMatch.grid_remove()
+            enterAll.grid_remove()
+            inUse.grid_remove()
+            values = [i, n, p1]
+            cursor.execute("INSERT INTO users VALUES (?, ?, ?);", values)
+            connection.commit()
+            clearFrame(regFrame)
+            userPage()
+    
+    # initiate variables to save the values of password and ID
+    new_id = tkinter.StringVar()
+    new_ps = tkinter.StringVar()
+    new_ps2 = tkinter.StringVar()
+    new_name = tkinter.StringVar()
+
+    #create the id input box 
+    Label(regFrame, text = "ID").grid(row=0, column=0)
+    Entry(regFrame, textvariable = new_id).grid(row=0, column=1)
+    
+    #creating the password input box 
+    Label(regFrame, text = "Password").grid(row=1, column=0)
+    Entry(regFrame, textvariable = new_ps, show="*").grid(row=1, column=1)
+    
+    Label(regFrame, text = "Confirm password").grid(row=2, column=0)
+    Entry(regFrame, textvariable = new_ps2, show="*").grid(row=2, column=1)
+    
+    Label(regFrame, text = "Name").grid(row=3, column=0)
+    Entry(regFrame, textvariable = new_name).grid(row=3, column=1)
+    
+    noMatch = Label(regFrame, text = "passwords do not match, please try again", fg ='red')
+    inUse = Label(regFrame, text="This id is already in use, please try another one", fg ='red')
+    enterAll = Label(regFrame, text="Please enter a value for all available fields", fg='red')
+    Button(regFrame, text = "Register", command=lambda: [newId(new_id.get(), new_ps.get(), new_ps2.get(), new_name.get())]).grid(row=5, column=0)
+
 # creates a page that will display all actions for an artist
 # no argument or return value
 def artistPage():
@@ -186,7 +241,6 @@ def idValidate():
     
 # creates the home page of the app
 def home():
-    
     global window
     homeFrame = Frame(window)
     homeFrame.pack()
@@ -207,7 +261,8 @@ def home():
     
     #creating the login button to press after having written the user ID and the password
     Button(homeFrame, text = "login", command=lambda: [setGlobals(username, password), clearFrame(homeFrame), idValidate()]).grid(row=4, column=0)
-    Button(homeFrame, text = "Register", command=lambda: [setGlobals(username, password), clearFrame(homeFrame), idValidate()]).grid(row=5, column=0)
+    Button(homeFrame, text = "sign-up", command=lambda: [clearFrame(homeFrame), registerPage()]).grid(row=5, column=0)
+    Button(homeFrame, text="EXIT", bg='red', fg='white', command=lambda: window.destroy()).grid(row=6, column=0, pady=30)
     window.mainloop()
     return
 
