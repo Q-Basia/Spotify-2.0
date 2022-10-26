@@ -5,6 +5,9 @@ from tkinter import *
 import sys # used to access the command line arguments
 #from tkinter import simpledialog
 
+# For keywords-search in the database:
+keywords = None
+
 connection = None
 cursor = None
 
@@ -266,23 +269,28 @@ def home():
     window.mainloop()
     return
 
-def searchInDB(keywords):
+def searchSongsAndPlaylists(currentKeywords):
     # Arguments: 
-    #   keywords: an array of string containing the keywords of the search
+    #   currentKeywords: an array of string containing the keywords of the search
     # Returns:
     #   result: a sorted list of tuples
+   
+    # Update the keywords for the countKeywords function
+    global keywords
+    keywords = currentKeywords
 
     # Initialize the function that will calculate the keywords in sql
-    connection.create_function('countKeywords', 2, countKeywords )
+    connection.create_function('countKeywords', 1, countKeywords )
     # Create the list of tuples that we will return and contains all the songs and playlists
     result = []
 
     # Find matching songs
     cursor.execute('''
-    SELECT sid, title, duration, countKeywords(title,:keywords)
+    SELECT sid, title, duration, countKeywords(title)
     FROM songs s
-    WHERE countKeywords(title,:keywords) > 0;
-    ''',{"keywords":keywords})
+    WHERE countKeywords(title) > 0;
+    ORDER BY countKeywords(title) desc;
+    ''')
 
     # Store all matching songs in the result
     rows = cursor.fetchall()
@@ -291,13 +299,14 @@ def searchInDB(keywords):
 
     # Find matching playlists 
     cursor.execute('''
-    SELECT p.pid, p.title, SUM(l.cnt*s.duration), countKeywords(title, :keywords)
+    SELECT p.pid, p.title, SUM(s.duration), countKeywords(p.title)
     FROM playlists p
     LEFT OUTER JOIN plinclude pl USING(pid)
     LEFT OUTER JOIN songs s USING(sid)
-    WHERE countKeywords(title, :keywords) > 0
-    GROUP BY p.pid, p.title;
-    ''', {"keywords":keywords})
+    WHERE countKeywords(p.title) > 0
+    GROUP BY p.pid, p.title
+    ORDER BY countKeywords(p.title) desc;
+    ''')
 
     # Store all matching playlists in the result
     rows = cursor.fetchall()
@@ -307,14 +316,53 @@ def searchInDB(keywords):
     # Return all of the matching songs and playlists
     # Format of each entry of result: (Type, id, title, duration, number of keywords)
     return result
+
+
+def searchArtists(currentKeywords):
+    # Arguments: 
+    #   currentKeywords: an array of string containing the keywords of the search
+    # Returns:
+    #   result: a sorted list of tuples
+   
+    # Update the keywords for the countKeywords function
+    global keywords
+    keywords = currentKeywords
+
+    # Initialize the function that will calculate the keywords in sql
+    connection.create_function('countKeywords', 1, countKeywords )
+    # Create the list of tuples that we will return and contains all the artists
+    result = []
+
+    # Find matching artists
+    cursor.execute('''
+    SELECT a.name, a.nationality, COUNT(s.sid), countKeywords(title)
+    FROM artists a
+    LEFT OUTER JOIN perform p USING(aid)
+    LEFT OUTER JOIN songs s USING(sid)
+    WHERE countKeywords(a.title) > 0
+    GROUP BY a.name, a.nationality
+    ORDER BY countKeywords(a.title);
+    ''')
+
+    # Store all matching artists in the result
+    rows = cursor.fetchall()
+    for row in rows:
+        result.append(("Songs",row[0],row[1], row[2], row[3]))
+
+    # We return the result
+    # Format of each entry of result: (Name, Nationality, Number of songs, Number of Keywords)
+    return result
     
 
-def countKeywords(title, keywords):
+def countKeywords(title):
     # Arguments:
     #   title: A string indicating the title of a song
     #   keywords: an array of strings containing the keywords of a search
     # Returns:
     #   count: number of keywords in the title
+
+    # Testing Purpose [DELETE]
+    global keywords
 
     count = 0 # number of keywords
 
@@ -327,6 +375,29 @@ def countKeywords(title, keywords):
 
     # return how many keywords were in title
     return count
+
+def songsOfArtist(artist):
+    # Arguments:
+    #   artist: A string indicating the aid of the artist
+    # Returns:
+    #   songs: An array of tuples containing all the songs of artist and its information
+
+    songs = []
+
+    # Get the songs and their information with SQL
+    cursor.execute('''
+    SELECT s.sid, s.title, s.duration
+    FROM artist a
+    LEFT OUTER JOIN perform p USING(aid)
+    LEFT OUTER JOIN songs s USING(sid)
+    ''')
+
+    # Store all the songs of the artist in the array songs
+    rows = cursor.fetchall()
+    for row in rows:
+        songs.append(("Songs",row[0],row[1], row[2], row[3]))  
+
+    return songs
 
 
 
