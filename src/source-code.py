@@ -169,7 +169,7 @@ def artistPage():
 
 # creates a page that contains all the actions a user can take on the app
 def userPage():
-        global window
+    global window
 
     # Variable used to store the keywords
     musicKeywords = tkinter.StringVar()
@@ -185,14 +185,14 @@ def userPage():
     # We store the keywords in a string variable
     Entry(userFrame, textvariable = musicKeywords).grid(row=3, column=0)
     # Button to search songs/playlists with keywords
-    Button(userFrame, text = "search for songs or playlists", command=lambda:[clearFrame(userFrame), displaySongsPlaylist(searchSongsAndPlaylists(musicKeywords.get().split()))]).grid(row=4, column=0)
+    Button(userFrame, text = "search for songs or playlists", command=lambda:[clearFrame(userFrame), displaySongsPlaylist(searchSongsAndPlaylists(musicKeywords.get().split()),0)]).grid(row=4, column=0)
     
     # messge to enter keywords to search for artist
     Label(userFrame, text = "enter artist name").grid(row=6, column=0, pady=(20,0))
     # We store the keywords in a string variable
     Entry(userFrame, textvariable = artistKeywords).grid(row=7, column=0)
     # Button to search artists with the keywords
-    Button(userFrame, text = "search for artists", command=lambda:displayArtists(searchArtists(artistKeywords.split()))).grid(row=8, column=0)
+    Button(userFrame, text = "search for artists", command=lambda:[clearFrame(userFrame), displayArtists(searchArtists(artistKeywords.get().split()),0)]).grid(row=8, column=0)
     # button to end the session
     Button(userFrame, text = "end session", fg='white', bg='red').grid(row=10, column=0, pady=(20,0))
     # button to logout
