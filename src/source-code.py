@@ -155,9 +155,12 @@ def artistPage():
 
 # creates a page that contains all the actions a user can take on the app
 def userPage():
-    global window
-    # create variable to store the keywords the user might look for
-    keywords = "" 
+        global window
+
+    # Variable used to store the keywords
+    musicKeywords = tkinter.StringVar()
+    artistKeywords = tkinter.StringVar()
+
     #create page
     userFrame = Frame(window, borderwidth=0)
     userFrame.pack()
@@ -165,12 +168,17 @@ def userPage():
     Button(userFrame, text = "start session", fg='white', bg='green').grid(row=0, column=0)
     # message to indicate where to enter keywords and the button to search
     Label(userFrame, text = "enter song/playlist").grid(row=2, column=0, pady=(20,0))
-    Entry(userFrame, textvariable = keywords).grid(row=3, column=0)
-    Button(userFrame, text = "search for songs or playlists").grid(row=4, column=0)
+    # We store the keywords in a string variable
+    Entry(userFrame, textvariable = musicKeywords).grid(row=3, column=0)
+    # Button to search songs/playlists with keywords
+    Button(userFrame, text = "search for songs or playlists", command=lambda:[clearFrame(userFrame), displaySongsPlaylist(searchSongsAndPlaylists(musicKeywords.get().split()))]).grid(row=4, column=0)
+    
     # messge to enter keywords to search for artist
     Label(userFrame, text = "enter artist name").grid(row=6, column=0, pady=(20,0))
-    Entry(userFrame, textvariable = keywords).grid(row=7, column=0)
-    Button(userFrame, text = "search for artists").grid(row=8, column=0)
+    # We store the keywords in a string variable
+    Entry(userFrame, textvariable = artistKeywords).grid(row=7, column=0)
+    # Button to search artists with the keywords
+    Button(userFrame, text = "search for artists", command=lambda:displayArtists(searchArtists(artistKeywords.split()))).grid(row=8, column=0)
     # button to end the session
     Button(userFrame, text = "end session", fg='white', bg='red').grid(row=10, column=0, pady=(20,0))
     # button to logout
@@ -288,7 +296,7 @@ def searchSongsAndPlaylists(currentKeywords):
     cursor.execute('''
     SELECT sid, title, duration, countKeywords(title)
     FROM songs s
-    WHERE countKeywords(title) > 0;
+    WHERE countKeywords(title) > 0
     ORDER BY countKeywords(title) desc;
     ''')
 
@@ -313,10 +321,16 @@ def searchSongsAndPlaylists(currentKeywords):
     for row in rows:
         result.append(("Playlist",row[0],row[1], row[2], row[3]))
 
+    # Order them from highest number of keywords to lowest
+    result.sort(key=tupleGetKeyWord,reverse=True)
+
     # Return all of the matching songs and playlists
     # Format of each entry of result: (Type, id, title, duration, number of keywords)
     return result
 
+# Small function to return the number of keywords from a tuple of result
+def tupleGetKeyWord(tuple):
+    return tuple[3]    
 
 def searchArtists(currentKeywords):
     # Arguments: 
@@ -341,7 +355,7 @@ def searchArtists(currentKeywords):
     LEFT OUTER JOIN songs s USING(sid)
     WHERE countKeywords(a.title) > 0
     GROUP BY a.name, a.nationality
-    ORDER BY countKeywords(a.title);
+    ORDER BY countKeywords(a.title) DESC;
     ''')
 
     # Store all matching artists in the result
@@ -352,7 +366,6 @@ def searchArtists(currentKeywords):
     # We return the result
     # Format of each entry of result: (Name, Nationality, Number of songs, Number of Keywords)
     return result
-    
 
 def countKeywords(title):
     # Arguments:
@@ -361,7 +374,6 @@ def countKeywords(title):
     # Returns:
     #   count: number of keywords in the title
 
-    # Testing Purpose [DELETE]
     global keywords
 
     count = 0 # number of keywords
@@ -375,6 +387,7 @@ def countKeywords(title):
 
     # return how many keywords were in title
     return count
+
 
 def songsOfArtist(artist):
     # Arguments:
@@ -399,7 +412,109 @@ def songsOfArtist(artist):
 
     return songs
 
+def songsOfPlaylist(playlist):
+    # Arguments:
+    #   playlist: A string indicating the pid of the playlist
+    # Returns:
+    #   songs: An array of tuples containing all the songs of playlist and its information
 
+    songs = []
+
+    # Get the songs and their information with SQL
+    cursor.execute('''
+    SELECT s.sid, s.title, s.duration
+    FROM playlist p
+    LEFT OUTER JOIN plinclude pl USING(pid)
+    LEFT OUTER JOIN songs s USING(sid)
+    ''')
+
+    # Store all the songs of the playlist in the array songs
+    rows = cursor.fetchall()
+    for row in rows:
+        songs.append(("Songs",row[0],row[1], row[2], row[3]))  
+
+    return songs
+
+def displaySongsPlaylist(musicArray):
+    # Format of each entry of result: (Type, id, title, duration, number of keywords)
+    
+    pageIndex = 0
+    print(musicArray)
+    size = len(musicArray)
+    # Can scroll through 5 playlist/songs each time
+
+    # Our window
+    global window
+
+    #create display page
+    displayFrame = Frame(window, borderwidth=0)
+    displayFrame.pack()
+
+    # button to return to user page
+    Button(displayFrame, text = "Return", command=lambda: [clearFrame(displayFrame), userPage()]).grid(row=0, column=0)
+
+    # Create the 5 slots for the 5 music
+    if(size > 0):
+        b1 = Button(displayFrame, text = musicTupleToString(musicArray[pageIndex])).grid(row=1, column=1)
+    if(size > 1):
+        b2 = Button(displayFrame, text = musicTupleToString(musicArray[pageIndex+1])).grid(row=2, column=1)
+    if(size > 2):
+        b3 = Button(displayFrame, text = musicTupleToString(musicArray[pageIndex+2])).grid(row=3, column=1)
+    if(size> 3):
+        b4 = Button(displayFrame, text = musicTupleToString(musicArray[pageIndex+3])).grid(row=4, column=1)
+    if(size > 4):
+        b5 = Button(displayFrame, text = musicTupleToString(musicArray[pageIndex+4])).grid(row=5, column=1)
+    
+    # Scroll down button
+    Button(displayFrame, text = "Scroll Down", command=lambda: scrollDown()).grid(row=6, column=1)
+    # Scroll up button
+    Button(displayFrame, text = "Scroll Up", command=lambda: scrollUp()).grid(row=0, column=1)
+   
+    def scrollDown():
+        print("Page index is: " + pageIndex)
+        if(pageIndex != (size-size%5)):
+            pageIndex = 5+pageIndex
+            if(pageIndex < size):
+                b1['text'] = musicTupleToString(musicArray[pageIndex])
+            if(pageIndex +1 < size):
+                b2['text'] = musicTupleToString(musicArray[pageIndex+1])
+            if(pageIndex + 2< size):
+                b3['text'] = musicTupleToString(musicArray[pageIndex+2])
+            if(pageIndex + 3< size):
+                b4['text'] = musicTupleToString(musicArray[pageIndex+3])
+            if(pageIndex + 4 < size):
+                b5['text'] = musicTupleToString(musicArray[pageIndex+4])
+
+    def scrollUp():
+        if(pageIndex != 0):
+            pageIndex = pageIndex - 5
+            if(pageIndex < size):
+                b1['text'] = musicTupleToString(musicArray[pageIndex])
+            if(pageIndex +1 < size):
+                b2['text'] = musicTupleToString(musicArray[pageIndex+1])
+            if(pageIndex + 2< size):
+                b3['text'] = musicTupleToString(musicArray[pageIndex+2])
+            if(pageIndex + 3< size):
+                b4['text'] = musicTupleToString(musicArray[pageIndex+3])
+            if(pageIndex + 4 < size):
+                b5['text'] = musicTupleToString(musicArray[pageIndex+4])
+
+
+
+def musicTupleToString(tuple):
+    # Takes the tuple of an array of songs/playlist and transform it into a complete string 
+    # Argument:
+        # Tuple: the tuple of a song
+    # Returns: The tuple as a single string 
+
+    # Format of each entry of result: (Type, id, title, duration, number of keywords)
+    string = tuple[0] + " | " + str(tuple[1]) + " | " + tuple[2] + " | " + str(tuple[3])
+    return string
+    
+
+def displayArtists(artistArray):
+    # Format of each entry of artistArray: (Name, Nationality, Number of songs, Number of Keywords)
+    return 0
 
 
 def main():
