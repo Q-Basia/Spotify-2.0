@@ -74,6 +74,8 @@ def reset():
     id = ""
     ps = ""
     
+    
+#add error when th id is longer than 4 characters
 def registerPage():
     global window, connection, cursor, id, ps
     regFrame = Frame(window)
@@ -83,18 +85,27 @@ def registerPage():
         cursor.execute(f"SELECT uid FROM users WHERE uid = '{i}';")
         inside = cursor.fetchone()
         if not i or not p1 or not p2 or not n:
+            tooLong.grid_remove()
             noMatch.grid_remove()
             inUse.grid_remove()
-            enterAll.grid(row=6, column =0)
+            enterAll.grid(row=7, column =0)
+        elif len(i) > 4:
+            enterAll.grid_remove()
+            enterAll.grid_remove()
+            noMatch.grid_remove()
+            tooLong.grid(row=7, column = 0)
         elif inside:
+            tooLong.grid_remove()
             enterAll.grid_remove()
             noMatch.grid_remove()
-            inUse.grid(row=6, column =0)
+            inUse.grid(row=7, column =0)
         elif p1 != p2:
+            tooLong.grid_remove()
             enterAll.grid_remove()
             inUse.grid_remove()
-            noMatch.grid(row=6, column =0)
+            noMatch.grid(row=7, column =0)
         else:
+            tooLong.grid_remove()
             noMatch.grid_remove()
             enterAll.grid_remove()
             inUse.grid_remove()
@@ -127,7 +138,9 @@ def registerPage():
     noMatch = Label(regFrame, text = "passwords do not match, please try again", fg ='red')
     inUse = Label(regFrame, text="This id is already in use, please try another one", fg ='red')
     enterAll = Label(regFrame, text="Please enter a value for all available fields", fg='red')
+    tooLong = Label(regFrame, text="ID cannot have more than have 4 characters, try another one", fg='red')
     Button(regFrame, text = "Register", command=lambda: [newId(new_id.get(), new_ps.get(), new_ps2.get(), new_name.get())]).grid(row=5, column=0)
+    Button(regFrame, text = "Home", command=lambda: [clearFrame(regFrame), home()]).grid(row=6, column=0)
 
 # creates a page that will display all actions for an artist
 # no argument or return value
@@ -152,6 +165,7 @@ def artistPage():
     Button(artistFrame, text = "find top playlists", command=lambda: [clearFrame(artistFrame)]).grid(row=4, column=0)
     # button to logout and return to home page
     Button(artistFrame, text = "logout", command=lambda: [clearFrame(artistFrame), reset(), home()]).grid(row=5, column=0, pady=(20,0))
+    Button(artistFrame, text = "EXIT", command=lambda: [reset(), window.destroy()]).grid(row=6, column=0, pady=(20,0))
 
 # creates a page that contains all the actions a user can take on the app
 def userPage():
@@ -192,8 +206,34 @@ def choose():
     chooseFrame.pack()
     # message and buttons to choose from
     Label(chooseFrame, text="would you like to login as a user or an artist").grid(row=0, column = 0)
-    Button(chooseFrame, text = "artist", command=lambda: [clearFrame(chooseFrame), artistValidate()]).grid(row=1, column=0)
-    Button(chooseFrame, text = "user", command=lambda: [clearFrame(chooseFrame), userValidate()]).grid(row=2, column=0)
+    Button(chooseFrame, text = "artist", command=lambda: [clearFrame(chooseFrame), login("artist")]).grid(row=1, column=0)
+    Button(chooseFrame, text = "user", command=lambda: [clearFrame(chooseFrame), login("user")]).grid(row=2, column=0)
+    Button(chooseFrame, text = "Back", command=lambda: [clearFrame(chooseFrame), home()]).grid(row=3, column=0)
+    
+def login(type):
+    global window
+    loginFrame = Frame(window)
+    loginFrame.pack()
+    # initiate variables to save the values of password and ID
+    userID = tkinter.StringVar()
+    password = tkinter.StringVar()
+
+    
+    #create the username input box
+    if type == "user":
+        Label(loginFrame, text = "user ID").grid(row=0, column=0)
+    else:
+        Label(loginFrame, text = "artist ID").grid(row=0, column=0)
+    Entry(loginFrame, textvariable = userID).grid(row=0, column=1)
+    
+    #creating the password input box 
+    Label(loginFrame, text = "Password").grid(row=1, column=0)
+    # make sure the password appears as * to the user
+    Entry(loginFrame, textvariable = password, show="*").grid(row=1, column=1)
+    
+    Button(loginFrame, text = "login", command=lambda: [setGlobals(userID, password), clearFrame(loginFrame), idValidate(type)]).grid(row=4, column=0)
+    
+    Button(loginFrame, text = "Back", command=lambda: [clearFrame(loginFrame), choose()]).grid(row=6, column=0)
 
 # connect to the database
 def connect(path):
@@ -228,27 +268,24 @@ def artistValidate():
         artistPage()
     
 # checks if the id exist and waht kind of id it is
-def idValidate():
+def idValidate(type):
     global connection, cursor, id
-    cursor.execute(f'''SELECT u.uid, 'both' FROM users u, artists a
-                    WHERE u.uid = a.aid AND u.uid = {id}
-                    UNION
-                    SELECT u.uid, 'user' FROM users u
-                    WHERE u.uid = {id} AND u.uid NOT IN(SELECT u.uid FROM users u, artists a
-                                                         WHERE u.uid = a.aid AND u.uid = {id})
-                    UNION 
-                    SELECT a.aid, 'artist' FROM artists a
-                    WHERE a.aid = {id} AND a.aid NOT IN(SELECT u.uid FROM users u, artists a
-                                                         WHERE u.uid = a.aid AND u.uid = {id});''')
-    idType = cursor.fetchone()
-    if not idType:
-        notInList()
-    elif idType[1] == 'both':
-        choose()
-    elif idType[1] == 'user':
-        userValidate()
-    elif idType[1] == 'artist':
-        artistValidate()
+    if type == "user":
+        cursor.execute(f'''SELECT u.uid FROM users u
+                    WHERE u.uid = '{id}'; ''')
+        idType = cursor.fetchone()
+        if not idType:
+            notInList()
+        else:
+            userValidate()
+    elif type == "artist":
+        cursor.execute(f'''SELECT a.aid FROM artists a
+                    WHERE a.aid = '{id}';''')
+        idType = cursor.fetchone()
+        if not idType:
+            notInList()
+        else: 
+            artistValidate()
     
 # creates the home page of the app
 def home():
@@ -256,22 +293,8 @@ def home():
     homeFrame = Frame(window)
     homeFrame.pack()
     
-    # initiate variables to save the values of password and ID
-    username = tkinter.StringVar()
-    password = tkinter.StringVar()
-
-    
-    #create the username input box 
-    Label(homeFrame, text = "ID").grid(row=0, column=0)
-    Entry(homeFrame, textvariable = username).grid(row=0, column=1)
-    
-    #creating the password input box 
-    Label(homeFrame, text = "Password").grid(row=1, column=0)
-    # make sure the password appears as * to the user
-    Entry(homeFrame, textvariable = password, show="*").grid(row=1, column=1)
-    
     #creating the login button to press after having written the user ID and the password
-    Button(homeFrame, text = "login", command=lambda: [setGlobals(username, password), clearFrame(homeFrame), idValidate()]).grid(row=4, column=0)
+    Button(homeFrame, text = "sign-in", command=lambda: [clearFrame(homeFrame), choose()]).grid(row=4, column=0)
     Button(homeFrame, text = "sign-up", command=lambda: [clearFrame(homeFrame), registerPage()]).grid(row=5, column=0)
     Button(homeFrame, text="EXIT", bg='red', fg='white', command=lambda: window.destroy()).grid(row=6, column=0, pady=30)
     window.mainloop()
