@@ -14,12 +14,23 @@ cursor = None
 # create global variables to store the is and password of the user
 ps = ""
 id = ""
+sno = 0
+listening = False
 
 # create the app window using 'Tk()', which is a function form tkinter
 window = Tk()
+window.configure(bg='gray')
 # set the title of the window
 window.title("Spotify 2.0") #title of the page
+ 
+    # connect to the database
+def connect(path):
+    global connection, cursor
 
+    connection = sqlite3.connect(path)
+    cursor = connection.cursor()
+    return      
+    
 # this function removes all widgets that were created for the specified page
 # to leave space for a new page
 #arguments:
@@ -27,83 +38,52 @@ window.title("Spotify 2.0") #title of the page
 def clearFrame(frame):
     global window
     frame.forget()
- 
-# Creates a page that displays a message to tell the user that the password is incorrect
-#   Also has a button to return to the home page
-def wrongPass():
-    global window
-    
-    # create the page and pack it
-    wrong = Frame(window)
-    wrong.pack()
-    
-    # create a label to display the error message
-    Label(wrong, text="password is incorrest, please return to home page and try again", fg='red').grid(row = 0, column = 0)
-    
-    # create the button to return to the home page
-    Button(wrong, text="return", command=lambda: [clearFrame(wrong), home()]).grid(row = 1, column= 0)
-    
-# creates a page that displays a message to tell the user the id doesn;t exist in the database    
-# with a button to return to the home page
-def notInList():
-    global window
-    
-    #create the page
-    er = Frame(window)
-    er.pack()
-    
-    # create a label to display the message
-    Label(er, text = "ID does not match a user or artist, please return to the home page to try again or register", fg ='red').grid(row = 0, column = 0)
-    
-    # create a button to return to the home page
-    Button(er, text="return", command=lambda: [clearFrame(er), home()]).grid(row = 1, column= 0)
-    
-# Sets the values of the id and password that were taken from the input box
-# argument:
-#   i: the id that was entered in the input
-#   p: the password value that was entered in the input 
-def setGlobals(i, p):
-    global ps, id
+        
+def setID(i):
+    global id
     id = i.get()
+def setPs(p):
+    global ps
     ps = p.get()
     
 # resets the values of id and password to null
 # called when a user logs out of the app
 def reset():
-    global id, ps
+    global id, ps, sno
     id = ""
     ps = ""
+    sno = 0
     
     
 #add error when th id is longer than 4 characters
 def registerPage():
     global window, connection, cursor, id, ps
-    regFrame = Frame(window)
+    regFrame = Frame(window, bg='gray')
     regFrame.pack()
     
     def newId(i, p1, p2, n):
-        cursor.execute(f"SELECT uid FROM users WHERE uid = '{i}';")
+        cursor.execute("SELECT uid FROM users WHERE uid = ?;",(i,))
         inside = cursor.fetchone()
         if not i or not p1 or not p2 or not n:
             tooLong.grid_remove()
             noMatch.grid_remove()
             inUse.grid_remove()
-            enterAll.grid(row=7, column =0)
+            enterAll.grid(row=7, columnspan=2)
         elif len(i) > 4:
             enterAll.grid_remove()
             enterAll.grid_remove()
             noMatch.grid_remove()
-            tooLong.grid(row=7, column = 0)
+            tooLong.grid(row=7, columnspan=2)
         elif inside:
             tooLong.grid_remove()
             enterAll.grid_remove()
             noMatch.grid_remove()
-            inUse.grid(row=7, column =0)
+            inUse.grid(row=7, columnspan=2)
         elif p1 != p2:
             tooLong.grid_remove()
             enterAll.grid_remove()
             inUse.grid_remove()
-            noMatch.grid(row=7, column =0)
+            noMatch.grid(row=7, columnspan=2)
         else:
             tooLong.grid_remove()
             noMatch.grid_remove()
@@ -122,25 +102,25 @@ def registerPage():
     new_name = tkinter.StringVar()
 
     #create the id input box 
-    Label(regFrame, text = "ID").grid(row=0, column=0)
-    Entry(regFrame, textvariable = new_id).grid(row=0, column=1)
+    Label(regFrame, text = "user ID", font=('Arial',15), bg='gray').grid(row=0, column=0)
+    Entry(regFrame, textvariable = new_id, font=('Arial',15), fg='green').grid(row=0, column=1)
     
     #creating the password input box 
-    Label(regFrame, text = "Password").grid(row=1, column=0)
-    Entry(regFrame, textvariable = new_ps, show="*").grid(row=1, column=1)
+    Label(regFrame, text = "Password", font=('Arial',15), bg='gray').grid(row=1, column=0)
+    Entry(regFrame, textvariable = new_ps, show="*", font=('Arial',15), fg='green').grid(row=1, column=1)
     
-    Label(regFrame, text = "Confirm password").grid(row=2, column=0)
-    Entry(regFrame, textvariable = new_ps2, show="*").grid(row=2, column=1)
+    Label(regFrame, text = "Confirm password", font=('Arial',15), bg='gray').grid(row=2, column=0)
+    Entry(regFrame, textvariable = new_ps2, show="*", font=('Arial',15), fg='green').grid(row=2, column=1)
     
-    Label(regFrame, text = "Name").grid(row=3, column=0)
-    Entry(regFrame, textvariable = new_name).grid(row=3, column=1)
+    Label(regFrame, text = "Name", font=('Arial',15), bg='gray').grid(row=3, column=0)
+    Entry(regFrame, textvariable = new_name, font=('Arial',15), fg='green').grid(row=3, column=1)
     
-    noMatch = Label(regFrame, text = "passwords do not match, please try again", fg ='red')
-    inUse = Label(regFrame, text="This id is already in use, please try another one", fg ='red')
-    enterAll = Label(regFrame, text="Please enter a value for all available fields", fg='red')
-    tooLong = Label(regFrame, text="ID cannot have more than have 4 characters, try another one", fg='red')
-    Button(regFrame, text = "Register", command=lambda: [newId(new_id.get(), new_ps.get(), new_ps2.get(), new_name.get())]).grid(row=5, column=0)
-    Button(regFrame, text = "Home", command=lambda: [clearFrame(regFrame), home()]).grid(row=6, column=0)
+    noMatch = Label(regFrame, text = "passwords do not match, please try again", font=('Arial',15), fg ='red', bg='gray')
+    inUse = Label(regFrame, text="This id is already in use, please try another one", fg ='red', font=('Arial',15), bg='gray')
+    enterAll = Label(regFrame, text="Please enter a value for all available fields", fg='red', font=('Arial',15), bg='gray')
+    tooLong = Label(regFrame, text="ID cannot have more than have 4 characters, try another one", fg='red', font=('Arial',15), bg='gray')
+    Button(regFrame, text = "Register", bg='gray', fg='turquoise', command=lambda: [newId(new_id.get(), new_ps.get(), new_ps2.get(), new_name.get())], font=('Arial',15)).grid(row=5, columnspan=2)
+    Button(regFrame, text = "Home", bg='gray', fg='red', command=lambda: [clearFrame(regFrame), home()], font=('Arial',15)).grid(row=6, columnspan=2)
 
 # creates a page that will display all actions for an artist
 # no argument or return value
@@ -155,150 +135,176 @@ def artistPage():
     artistFrame.pack()
     
     # label to tell the artist where to enter values of new song
-    Label(artistFrame, text="please enter name and duration of song in seconds, respectively").grid(row=0, column=0)
+    Label(artistFrame, text="please enter name and duration of song in seconds, respectively", font=('Arial',15)).grid(row=0, column=0)
     # input box for the song details, must be name followed by suration
-    Entry(artistFrame, textvariable = new_song).grid(row=1, column=0)
+    Entry(artistFrame, textvariable = new_song, font=('Arial',15)).grid(row=1, column=0)
     
-    # buttons to add the song, find top users and top playlists
-    Button(artistFrame, text = "add song").grid(row=2, column=0, pady=(0,20))
-    Button(artistFrame, text = "find top users", command=lambda: [clearFrame(artistFrame)]).grid(row=3, column=0)
-    Button(artistFrame, text = "find top playlists", command=lambda: [clearFrame(artistFrame)]).grid(row=4, column=0)
-    # button to logout and return to home page
-    Button(artistFrame, text = "logout", command=lambda: [clearFrame(artistFrame), reset(), home()]).grid(row=5, column=0, pady=(20,0))
-    Button(artistFrame, text = "EXIT", command=lambda: [reset(), window.destroy()]).grid(row=6, column=0, pady=(20,0))
+    # buttons to add the song, find top users and top playlists, logout and exit the program
+    Button(artistFrame, text = "add song", font=('Arial',15)).grid(row=2, column=0, pady=(0,20))
+    Button(artistFrame, text = "find top users", font=('Arial',15), command=lambda: [clearFrame(artistFrame)]).grid(row=3, column=0)
+    Button(artistFrame, text = "logout", font=('Arial',15), command=lambda: [clearFrame(artistFrame), reset(), home()]).grid(row=5, column=0, pady=(20,0))
+    Button(artistFrame, text = "EXIT", font=('Arial',15), command=lambda: [reset(), window.destroy()]).grid(row=6, column=0, pady=(20,0))
 
 # creates a page that contains all the actions a user can take on the app
 def userPage():
-    global window
-
+    global window, listening, sno, id
     # Variable used to store the keywords
     musicKeywords = tkinter.StringVar()
-    artistKeywords = tkinter.StringVar()
-
+    artistKeywords = tkinter.StringVar()   
+    
+    #cursor.execute()
     #create page
     userFrame = Frame(window, borderwidth=0)
     userFrame.pack()
+    
+    def startSession():
+        global listening, connection, cursor, sno, id
+        if listening == True:
+            notListening.grid_remove()
+            alreadyL.grid(row=1, column=0)
+        else:
+            notListening.grid_remove()
+            alreadyL.grid_remove()
+            listening = True 
+            cursor.execute(f'''SELECT MAX(sno) FROM sessions WHERE uid = '{id}';''')
+            top_sno = cursor.fetchone()
+            if not top_sno[0]:
+                sno = 1
+            else:
+                sno = top_sno[0] + 1
+            cursor.execute(f'''INSERT INTO sessions VALUES ('{id}', {sno}, date(), null);''')
+            connection.commit()
+            
+    def endSession():
+        global listening, connection, cursor, sno, id
+        if listening == False:
+            alreadyL.grid_remove()
+            notListening.grid(row=9, column = 0)
+        else:
+            notListening.grid_remove()
+            alreadyL.grid_remove()
+            listening = False
+            cursor.execute(f'''UPDATE sessions SET end = date() WHERE uid = '{id}' AND sno = {sno};''')
+            connection.commit()
+            
+    # initiate error labels
+    alreadyL = Label(userFrame, text = "you are already in a listening session", font=('Arial',15), fg='red')
+    notListening = Label(userFrame, text="you are not currently in a listening session", font=('Arial',15), fg='red')
+        
     # button to start the session
-    Button(userFrame, text = "start session", fg='white', bg='green').grid(row=0, column=0)
+    Button(userFrame, text = "start session", fg='white', bg='green', command=lambda: startSession(), font=('Arial',15)).grid(row=0, column=0)
     # message to indicate where to enter keywords and the button to search
-    Label(userFrame, text = "enter song/playlist").grid(row=2, column=0, pady=(20,0))
+    Label(userFrame, text = "enter song/playlist", font=('Arial',15)).grid(row=2, column=0, pady=(20,0))
     # We store the keywords in a string variable
-    Entry(userFrame, textvariable = musicKeywords).grid(row=3, column=0)
+    Entry(userFrame, textvariable = musicKeywords, font=('Arial',15)).grid(row=3, column=0)
     # Button to search songs/playlists with keywords
-    Button(userFrame, text = "search for songs or playlists", command=lambda:[clearFrame(userFrame), displaySongsPlaylist(searchSongsAndPlaylists(musicKeywords.get().split()),0)]).grid(row=4, column=0)
+    Button(userFrame, text = "search for songs or playlists", font=('Arial',15), command=lambda:[clearFrame(userFrame), displaySongsPlaylist(searchSongsAndPlaylists(musicKeywords.get().split()), 0)]).grid(row=4, column=0)
     
     # messge to enter keywords to search for artist
-    Label(userFrame, text = "enter artist name").grid(row=6, column=0, pady=(20,0))
+    Label(userFrame, text = "enter artist name", font=('Arial',15)).grid(row=6, column=0, pady=(20,0))
     # We store the keywords in a string variable
-    Entry(userFrame, textvariable = artistKeywords).grid(row=7, column=0)
+    Entry(userFrame, textvariable = artistKeywords, font=('Arial',15)).grid(row=7, column=0)
     # Button to search artists with the keywords
-    Button(userFrame, text = "search for artists", command=lambda:[clearFrame(userFrame), displayArtists(searchArtists(artistKeywords.get().split()),0)]).grid(row=8, column=0)
+    Button(userFrame, text = "search for artists", command=lambda:displayArtists(searchArtists(artistKeywords.split())), font=('Arial',15)).grid(row=8, column=0)
     # button to end the session
-    Button(userFrame, text = "end session", fg='white', bg='red').grid(row=10, column=0, pady=(20,0))
+    Button(userFrame, text = "end session", fg='white', bg='red', command=lambda: endSession(), font=('Arial',15)).grid(row=10, column=0, pady=(20,0))
     # button to logout
-    Button(userFrame, text = "logout", command=lambda: [clearFrame(userFrame), home()]).grid(row=11, column=0, pady=(20,0))
+    Button(userFrame, text = "logout", command=lambda: [clearFrame(userFrame), home()], font=('Arial',15)).grid(row=11, column=0, pady=(20,0))
     
-# creates a page to ask the user if they want to login as a user or an artist
 def choose():
     global window
-    # create page
-    chooseFrame = Frame(window)
-    chooseFrame.pack()
-    # message and buttons to choose from
-    Label(chooseFrame, text="would you like to login as a user or an artist").grid(row=0, column = 0)
-    Button(chooseFrame, text = "artist", command=lambda: [clearFrame(chooseFrame), login("artist")]).grid(row=1, column=0)
-    Button(chooseFrame, text = "user", command=lambda: [clearFrame(chooseFrame), login("user")]).grid(row=2, column=0)
-    Button(chooseFrame, text = "Back", command=lambda: [clearFrame(chooseFrame), home()]).grid(row=3, column=0)
+    chooseF = Frame(window, bg='gray')
+    chooseF.pack()
+    Label(chooseF, text = "would you to to login as a user or an artist", bg='gray',font=('Arial',15)).grid(row=3)
+    Button(chooseF, text = "artist", command=lambda: [clearFrame(chooseF), Validate("artist")], bg='gray', font=('Arial',15)).grid(row=5)
+    Button(chooseF, text = "user", bg='gray',command=lambda:[clearFrame(chooseF), Validate("user")], font=('Arial',15)).grid(row=4)
+    Button(chooseF, text="back", fg='red', bg='gray',command=lambda: [clearFrame(chooseF), home()], font=('Arial',15)).grid(row=6)
     
-def login(type):
-    global window
-    loginFrame = Frame(window)
-    loginFrame.pack()
-    # initiate variables to save the values of password and ID
-    userID = tkinter.StringVar()
-    password = tkinter.StringVar()
-
-    
-    #create the username input box
-    if type == "user":
-        Label(loginFrame, text = "user ID").grid(row=0, column=0)
-    else:
-        Label(loginFrame, text = "artist ID").grid(row=0, column=0)
-    Entry(loginFrame, textvariable = userID).grid(row=0, column=1)
-    
-    #creating the password input box 
-    Label(loginFrame, text = "Password").grid(row=1, column=0)
-    # make sure the password appears as * to the user
-    Entry(loginFrame, textvariable = password, show="*").grid(row=1, column=1)
-    
-    Button(loginFrame, text = "login", command=lambda: [setGlobals(userID, password), clearFrame(loginFrame), idValidate(type)]).grid(row=4, column=0)
-    
-    Button(loginFrame, text = "Back", command=lambda: [clearFrame(loginFrame), choose()]).grid(row=6, column=0)
-
-# connect to the database
-def connect(path):
-    global connection, cursor
-
-    connection = sqlite3.connect(path)
-    cursor = connection.cursor()
-    return
-
-# verifies if the password is correct for the user
-def userValidate():
-    global id, ps, connection, cursor
-    cursor.execute('''SELECT 'True'
+def Validate(u):
+    global window, id, ps
+    passP = Frame(window)
+    passP.pack()
+    new_ps = tkinter.StringVar()
+    Label(passP, text="enter your password below", font=('Arial',15)).grid(row=0, columnspan=3)
+    wP = Label(passP, text="password is incorrect, please try again", fg='red')
+    Label(passP, text = "password", font=('Arial',15)).grid(row=1, column=0)
+    Entry(passP, textvariable=new_ps, show="*", font=('Arial',15)).grid(row=1, column=1)
+    Button(passP, text="login", command=lambda:[setPs(new_ps), test()], font=('Arial',15)).grid(row=2, column=0)
+    Button(passP, text="back", command=lambda: [clearFrame(passP), choose()], font=('Arial',15)).grid(row=3, column=0)
+    def test():
+        if u == "artist":
+            cursor.execute('''SELECT 'True'
+                        FROM artists
+                        WHERE aid = ? AND pwd = ?;''', (id, ps),)
+            val = cursor.fetchone()
+            if not val:
+                wP.grid(row =0, column = 0)
+            else :
+                clearFrame(passP)
+                artistPage()
+        else:
+            cursor.execute('''SELECT 'True'
                     FROM users
                     WHERE uid = ? AND pwd = ?;''', (id,ps),)
-    val = cursor.fetchone()
-    if not val:
-        wrongPass()
-    else :
-        userPage()
-
-# verifies if the password is correct for an artist
-def artistValidate():
-    global id, ps, connection, cursor
-    cursor.execute('''SELECT 'True'
-                    FROM artists
-                    WHERE aid = ? AND pwd = ?;''', (id, ps),)
-    val = cursor.fetchone()
-    if not val:
-        wrongPass()
-    else :
-        artistPage()
-    
-# checks if the id exist and waht kind of id it is
-def idValidate(type):
-    global connection, cursor, id
-    if type == "user":
-        cursor.execute(f'''SELECT u.uid FROM users u
-                    WHERE u.uid = '{id}'; ''')
-        idType = cursor.fetchone()
-        if not idType:
-            notInList()
-        else:
-            userValidate()
-    elif type == "artist":
-        cursor.execute(f'''SELECT a.aid FROM artists a
-                    WHERE a.aid = '{id}';''')
-        idType = cursor.fetchone()
-        if not idType:
-            notInList()
-        else: 
-            artistValidate()
-    
-# creates the home page of the app
+            val = cursor.fetchone()
+            if not val:
+                wP.grid(row =0, column = 0)
+            else :
+                clearFrame(passP)
+                userPage() 
+                        
+     
 def home():
-    global window
-    homeFrame = Frame(window)
-    homeFrame.pack()
+    global window, connection, cursor, id, ps
+    signinFrame = Frame(window, bg='gray')
+    signinFrame.pack()
+    signinBottom = Frame(window, bg='gray')
+    signinBottom.pack(side =BOTTOM)
+    Label(signinFrame, text="Log in", font=('Arial',15), bg='gray').pack()#.grid(row=0, columnspan=3)
+    noID = Label(signinBottom, text = "ID does not match any account, please try again", font=('Arial',15), fg ='red', bg='gray')
     
-    #creating the login button to press after having written the user ID and the password
-    Button(homeFrame, text = "sign-in", command=lambda: [clearFrame(homeFrame), choose()]).grid(row=4, column=0)
-    Button(homeFrame, text = "sign-up", command=lambda: [clearFrame(homeFrame), registerPage()]).grid(row=5, column=0)
-    Button(homeFrame, text="EXIT", bg='red', fg='white', command=lambda: window.destroy()).grid(row=6, column=0, pady=30)
+    def notList():  
+        noID.pack(side = TOP)
+            
+   
+
+    def check():
+        cursor.execute(f'''SELECT u.uid, 'both' FROM users u, artists a
+                    WHERE u.uid = a.aid AND u.uid = '{id}'
+                    UNION
+                    SELECT u.uid, 'user' FROM users u
+                    WHERE u.uid = '{id}' AND u.uid NOT IN(SELECT u.uid FROM users u, artists a
+                                                         WHERE u.uid = a.aid AND u.uid = '{id}')
+                    UNION 
+                    SELECT a.aid, 'artist' FROM artists a
+                    WHERE a.aid = '{id}' AND a.aid NOT IN(SELECT u.uid FROM users u, artists a
+                                                         WHERE u.uid = a.aid AND u.uid = '{id}');''')
+        idType = cursor.fetchone()
+        if not idType:
+            notList()
+        elif idType[1] == 'both':
+            clearFrame(signinFrame)
+            clearFrame(signinBottom)
+            choose()
+        elif idType[1] == 'user':
+            clearFrame(signinFrame)
+            clearFrame(signinBottom)
+            Validate("user")
+        elif idType[1] == 'artist':
+            clearFrame(signinFrame)
+            clearFrame(signinBottom)
+            Validate("artist")
+        
+    new_id = tkinter.StringVar()
+    Label(signinFrame, text = "ID",font=('Arial',15), bg='gray').pack(side = LEFT)#.grid(row=1, column=0)
+    Entry(signinFrame, textvariable = new_id, font=('Arial',15), fg='green').pack(side = LEFT)#.grid(row=1, column=1)   
+
+    Button(signinBottom, text="exit", bg='gray', fg='red', command=lambda: window.destroy(), font=('Arial',15)).pack(side = BOTTOM)#.grid(row=6, column=0, pady=30)
+    Button(signinBottom, text = "register", command=lambda: [clearFrame(signinFrame), clearFrame(signinBottom), registerPage()], font=('Arial',15), bg='gray').pack(side = BOTTOM)#.grid(row=4, column=0)
+    Button(signinBottom, text = "next", command=lambda: [setID(new_id), check()], fg='turquoise', bg='gray', font=('Arial',15)).pack(side = BOTTOM)#.grid(row=3, column=0)
+    
     window.mainloop()
-    return
+
 
 def searchSongsAndPlaylists(currentKeywords):
     # Arguments: 
