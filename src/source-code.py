@@ -75,7 +75,7 @@ def reset():
     ps = ""
     
     
-#add error when the id is longer than 4 characters
+#add error when th id is longer than 4 characters
 def registerPage():
     global window, connection, cursor, id, ps
     regFrame = Frame(window)
@@ -148,7 +148,7 @@ def artistPage():
     global window 
     
     # initiate value for if the artist wants to add a song
-    new_song = tkinter.StringVar()
+    new_song = ""
     
     # create page
     artistFrame = Frame(window)
@@ -156,11 +156,11 @@ def artistPage():
     
     # label to tell the artist where to enter values of new song
     Label(artistFrame, text="please enter name and duration of song in seconds, respectively").grid(row=0, column=0)
-    # input box for the song details, must be name followed by duration
+    # input box for the song details, must be name followed by suration
     Entry(artistFrame, textvariable = new_song).grid(row=1, column=0)
-        
+    
     # buttons to add the song, find top users and top playlists
-    Button(artistFrame, text = "add song", command=lambda: [clearFrame(artistFrame), addSong(new_song)]).grid(row=2, column=0, pady=(0,20))
+    Button(artistFrame, text = "add song").grid(row=2, column=0, pady=(0,20))
     Button(artistFrame, text = "find top users", command=lambda: [clearFrame(artistFrame)]).grid(row=3, column=0)
     Button(artistFrame, text = "find top playlists", command=lambda: [clearFrame(artistFrame)]).grid(row=4, column=0)
     # button to logout and return to home page
@@ -254,7 +254,7 @@ def userValidate():
         wrongPass()
     else :
         userPage()
-    
+
 # verifies if the password is correct for an artist
 def artistValidate():
     global id, ps, connection, cursor
@@ -578,46 +578,6 @@ def artistTupleToString(tuple):
     string = tuple[1] + " | " + tuple[2] + " | " + str(tuple[3]) 
     return string
 
-def songExist():
-    global window
-    
-    #create the page
-    er = Frame(window)
-    er.pack()
-    
-    # create a label to display the message
-    Label(er, text = "Song already exists", fg ='red').grid(row = 0, column = 0)
-    
-    # create a button to return to the home page
-    Button(er, text="return", command=lambda: [clearFrame(er), artistPage()]).grid(row = 1, column= 0)
-
-def addSong(new_song):
-    song = new_song.get().split(",")
-    name = song[0]
-    dur = song[1]
-    cursor.execute(f"SELECT title FROM songs WHERE title = '{name}' AND duration = '{dur}';")
-    row = cursor.fetchone()
-    
-    if not row:
-        cursor.execute("SELECT max(sid) FROM songs;")
-        idrow = cursor.fetchone()
-        id = idrow[0] + 1
-        values = [id, name, dur]
-        cursor.execute("INSERT INTO songs VALUES (?, ?, ?);", values)
-        global window
-    
-        #create the page
-        er = Frame(window)
-        er.pack()
-        
-        # create a label to display the message
-        Label(er, text = "Song has been added", fg ='green').grid(row = 0, column = 0)
-        
-        # create a button to return to the home page
-        Button(er, text="return", command=lambda: [clearFrame(er), artistPage()]).grid(row = 1, column= 0)
-    else:
-        songExist()
-            
 
 def main():
     '''
