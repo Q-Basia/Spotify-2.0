@@ -195,17 +195,17 @@ def userPage():
     Button(userFrame, text = "start session", fg='white', bg='green', command=lambda: startSession(), font=('Arial',15)).grid(row=0, column=0)
     # message to indicate where to enter keywords and the button to search
     Label(userFrame, text = "enter song/playlist", font=('Arial',15)).grid(row=2, column=0, pady=(20,0))
-    # We store the keywords in a string variable
-    Entry(userFrame, textvariable = musicKeywords, font=('Arial',15)).grid(row=3, column=0)
+     # We store the keywords in a string variable
+    Entry(userFrame, textvariable = musicKeywords).grid(row=3, column=0)
     # Button to search songs/playlists with keywords
-    Button(userFrame, text = "search for songs or playlists", font=('Arial',15), command=lambda:[clearFrame(userFrame), displaySongsPlaylist(searchSongsAndPlaylists(musicKeywords.get().split()), 0)]).grid(row=4, column=0)
+    Button(userFrame, text = "search for songs or playlists", command=lambda:[clearFrame(userFrame), displaySongsPlaylist(searchSongsAndPlaylists(musicKeywords.get().split()),0)]).grid(row=4, column=0)
     
-    # messge to enter keywords to search for artist
-    Label(userFrame, text = "enter artist name", font=('Arial',15)).grid(row=6, column=0, pady=(20,0))
+    # message to enter keywords to search for artist
+    Label(userFrame, text = "enter artist name").grid(row=6, column=0, pady=(20,0))
     # We store the keywords in a string variable
-    Entry(userFrame, textvariable = artistKeywords, font=('Arial',15)).grid(row=7, column=0)
+    Entry(userFrame, textvariable = artistKeywords).grid(row=7, column=0)
     # Button to search artists with the keywords
-    Button(userFrame, text = "search for artists", command=lambda:displayArtists(searchArtists(artistKeywords.split())), font=('Arial',15)).grid(row=8, column=0)
+    Button(userFrame, text = "search for artists", command=lambda:[clearFrame(userFrame), displayArtists(searchArtists(artistKeywords.get().split()),0)]).grid(row=8, column=0)
     # button to end the session
     Button(userFrame, text = "end session", fg='white', bg='red', command=lambda: endSession(), font=('Arial',15)).grid(row=10, column=0, pady=(20,0))
     # button to logout
@@ -312,6 +312,8 @@ def searchSongsAndPlaylists(currentKeywords):
     # Returns:
     #   result: a sorted list of tuples
    
+    global cursor
+
     # Update the keywords for the countKeywords function
     global keywords
     keywords = currentKeywords
@@ -332,7 +334,7 @@ def searchSongsAndPlaylists(currentKeywords):
     # Store all matching songs in the result
     rows = cursor.fetchall()
     for row in rows:
-        result.append(("Songs",row[0],row[1], row[2], row[3]))
+        result.append(("Song",row[0],row[1], row[2], row[3]))
 
     # Find matching playlists 
     cursor.execute('''
@@ -366,7 +368,9 @@ def searchArtists(currentKeywords):
     #   currentKeywords: an array of string containing the keywords of the search
     # Returns:
     #   result: a sorted list of tuples
-   
+    
+    global cursor
+
     # Update the keywords for the countKeywords function
     global keywords
     keywords = currentKeywords
@@ -378,7 +382,7 @@ def searchArtists(currentKeywords):
 
     # Find matching artists
     cursor.execute('''
-    SELECT a.name, a.nationality, COUNT(s.sid), countKeywords(title)
+    SELECT a.name, a.nationality, COUNT(s.sid), countKeywords(title), a.aid
     FROM artists a
     LEFT OUTER JOIN perform p USING(aid)
     LEFT OUTER JOIN songs s USING(sid)
@@ -389,11 +393,11 @@ def searchArtists(currentKeywords):
     # Store all matching artists in the result
     rows = cursor.fetchall()
     for row in rows:
-        result.append(("Artist",row[0],row[1], row[2], row[3]))
+        result.append(("Artist",row[0],row[1], row[2], row[3], row[4]))
 
     # Find matching songs of artists
     cursor.execute('''
-    SELECT a.name, a.nationality, COUNT(s.sid), countKeywords(title)
+    SELECT a.name, a.nationality, COUNT(s.sid), countKeywords(title), a.aid
     FROM artists a
     LEFT OUTER JOIN perform p USING(aid)
     LEFT OUTER JOIN songs s USING(sid)
@@ -404,13 +408,13 @@ def searchArtists(currentKeywords):
     # Store all matching artists in the result
     rows = cursor.fetchall()
     for row in rows:
-        result.append(("Artist",row[0],row[1], row[2], row[3]))
+        result.append(("Artist",row[0],row[1], row[2], row[3], row[4]))
 
     # Order them from highest number of keywords to lowest
     result.sort(key=artistTupleGetKeyWord,reverse=True)
 
     # We return the result
-    # Format of each entry of result: (Type, Name, Nationality, Number of songs, Number of Keywords)
+    # Format of each entry of result: (Type, Name, Nationality, Number of songs, Number of Keywords, Artist ID)
     return result
 
 def artistTupleGetKeyWord(tuple):
@@ -431,59 +435,16 @@ def countKeywords(title):
     # For each keyword, we check if it appears in the title
     # Note: the comparison is not case-sensitive
     for keyword in keywords:
-        for word in title.split():
-            if(keyword.lower() == word.lower()):
-                count += 1
+        # If the title is empty (or only has whitespace), we simply say that it has the keyword
+        if(not (title and title.strip())):
+            count += 1
+        elif(keyword.lower() in title.lower()):
+            # Count number of times keyword appears in title
+            count += title.lower().count(keyword.lower())
 
     # return how many keywords were in title
     return count
 
-
-def songsOfArtist(artist):
-    # Arguments:
-    #   artist: A string indicating the aid of the artist
-    # Returns:
-    #   songs: An array of tuples containing all the songs of artist and its information
-
-    songs = []
-
-    # Get the songs and their information with SQL
-    cursor.execute('''
-    SELECT s.sid, s.title, s.duration
-    FROM artist a
-    LEFT OUTER JOIN perform p USING(aid)
-    LEFT OUTER JOIN songs s USING(sid)
-    ''')
-
-    # Store all the songs of the artist in the array songs
-    rows = cursor.fetchall()
-    for row in rows:
-        songs.append(("Songs",row[0],row[1], row[2], row[3]))  
-
-    return songs
-
-def songsOfPlaylist(playlist):
-    # Arguments:
-    #   playlist: A string indicating the pid of the playlist
-    # Returns:
-    #   songs: An array of tuples containing all the songs of playlist and its information
-
-    songs = []
-
-    # Get the songs and their information with SQL
-    cursor.execute('''
-    SELECT s.sid, s.title, s.duration
-    FROM playlist p
-    LEFT OUTER JOIN plinclude pl USING(pid)
-    LEFT OUTER JOIN songs s USING(sid)
-    ''')
-
-    # Store all the songs of the playlist in the array songs
-    rows = cursor.fetchall()
-    for row in rows:
-        songs.append(("Songs",row[0],row[1], row[2], row[3]))  
-
-    return songs
 
 def displaySongsPlaylist(musicArray, pageIndex):
     # Format of each entry of result: (Type, id, title, duration, number of keywords)
@@ -503,15 +464,15 @@ def displaySongsPlaylist(musicArray, pageIndex):
 
     # Create the 5 slots for the 5 music
     if(0 <= pageIndex< size):
-        Button(displayFrame, text = musicTupleToString(musicArray[pageIndex])).grid(row=1, column=1, pady = 4)
+        Button(displayFrame, text = musicTupleToString(musicArray[pageIndex]), command = lambda: determineContent(musicArray[pageIndex], displayFrame)).grid(row=1, column=1, pady = 4)
     if(0 <= pageIndex +1 < size):
-        Button(displayFrame, text = musicTupleToString(musicArray[pageIndex+1])).grid(row=2, column=1, pady = 4)
+        Button(displayFrame, text = musicTupleToString(musicArray[pageIndex+1]), command = lambda: determineContent(musicArray[pageIndex+1], displayFrame)).grid(row=2, column=1, pady = 4)
     if(0 <= pageIndex +2 < size):
-        Button(displayFrame, text = musicTupleToString(musicArray[pageIndex+2])).grid(row=3, column=1, pady = 4)
+        Button(displayFrame, text = musicTupleToString(musicArray[pageIndex+2]), command = lambda: determineContent(musicArray[pageIndex+2], displayFrame)).grid(row=3, column=1, pady = 4)
     if(0 <= pageIndex + 3 < size):
-        Button(displayFrame, text = musicTupleToString(musicArray[pageIndex+3])).grid(row=4, column=1, pady = 4)
+        Button(displayFrame, text = musicTupleToString(musicArray[pageIndex+3]), command = lambda: determineContent(musicArray[pageIndex+3], displayFrame)).grid(row=4, column=1, pady = 4)
     if(0 <= pageIndex + 4 < size):
-        Button(displayFrame, text = musicTupleToString(musicArray[pageIndex+4])).grid(row=5, column=1, pady = 4)
+        Button(displayFrame, text = musicTupleToString(musicArray[pageIndex+4]), command = lambda: determineContent(musicArray[pageIndex+4], displayFrame)).grid(row=5, column=1, pady = 4)
     
     # Scroll down button
     if(pageIndex + 5 < size):
@@ -536,10 +497,9 @@ def musicTupleToString(tuple):
     
 
 def displayArtists(artistArray, pageIndex):
-    # Format of each entry of artistArray: (Type, Name, Nationality, Number of songs, Number of Keywords)
+    # Format of each entry of artistArray: (Type, Name, Nationality, Number of songs, Number of Keywords, Artist ID)
     size = len(artistArray)
     # Can scroll through 5 playlist/songs each time
-    print(artistArray)
 
     # Our window
     global window
@@ -553,15 +513,15 @@ def displayArtists(artistArray, pageIndex):
 
     # Create the 5 slots for the 5 music
     if(0 <= pageIndex< size):
-        Button(displayFrame, text = artistTupleToString(artistArray[pageIndex])).grid(row=1, column=1, pady = 4)
+        Button(displayFrame, text = artistTupleToString(artistArray[pageIndex]), command = lambda: determineContent(artistArray[pageIndex], displayFrame)).grid(row=1, column=1, pady = 4)
     if(0 <= pageIndex +1 < size):
-        Button(displayFrame, text = artistTupleToString(artistArray[pageIndex+1])).grid(row=2, column=1, pady = 4)
+        Button(displayFrame, text = artistTupleToString(artistArray[pageIndex+1]), command = lambda: determineContent(artistArray[pageIndex+1], displayFrame)).grid(row=2, column=1, pady = 4)
     if(0 <= pageIndex +2 < size):
-        Button(displayFrame, text = artistTupleToString(artistArray[pageIndex+2])).grid(row=3, column=1, pady = 4)
+        Button(displayFrame, text = artistTupleToString(artistArray[pageIndex+2]), command = lambda: determineContent(artistArray[pageIndex+2], displayFrame)).grid(row=3, column=1, pady = 4)
     if(0 <= pageIndex + 3 < size):
-        Button(displayFrame, text = artistTupleToString(artistArray[pageIndex+3])).grid(row=4, column=1, pady = 4)
+        Button(displayFrame, text = artistTupleToString(artistArray[pageIndex+3]), command = lambda: determineContent(artistArray[pageIndex+3], displayFrame)).grid(row=4, column=1, pady = 4)
     if(0 <= pageIndex + 4 < size):
-        Button(displayFrame, text = artistTupleToString(artistArray[pageIndex+4])).grid(row=5, column=1, pady = 4)
+        Button(displayFrame, text = artistTupleToString(artistArray[pageIndex+4]), command = lambda: determineContent(artistArray[pageIndex+4], displayFrame)).grid(row=5, column=1, pady = 4)
     
     # Scroll down button
     if(pageIndex + 5 < size):
@@ -580,9 +540,289 @@ def artistTupleToString(tuple):
         # Tuple: the tuple of an artist
     # Returns: The tuple as a single string 
 
-    # Format of each entry of artistArray: (Type, Name, Nationality, Number of songs, Number of Keywords)
+    # Format of each entry of artistArray: (Type, Name, Nationality, Number of songs, Number of Keywords, Artist ID)
     string = tuple[1] + " | " + tuple[2] + " | " + str(tuple[3]) 
     return string
+
+def songsOfArtist(artist):
+    # Arguments:
+    #   artist: A string indicating the aid of the artist
+    # Returns:
+    #   songs: An array of tuples containing all the songs of artist and its information
+
+    global cursor
+
+    songs = []
+
+    # Get the songs and their information with SQL
+    cursor.execute('''
+    SELECT s.sid, s.title, s.duration
+    FROM artists a
+    LEFT OUTER JOIN perform p USING(aid)
+    LEFT OUTER JOIN songs s USING(sid)
+    WHERE a.aid LIKE :num;
+    ''', {"num":artist})
+
+    # Store all the songs of the artist in the array songs
+    rows = cursor.fetchall()
+    for row in rows:
+        songs.append(("Song",str(row[0]),row[1], str(row[2])))  
+
+    return songs
+
+def songsOfPlaylist(playlist):
+    # Arguments:
+    #   playlist: A string indicating the pid of the playlist
+    # Returns:
+    #   songs: An array of tuples containing all the songs of playlist and its information
+    global cursor
+
+    songs = []
+    # Get the songs and their information with SQL
+    cursor.execute('''
+    SELECT s.sid, s.title, s.duration
+    FROM playlists p
+    LEFT OUTER JOIN plinclude pl USING(pid)
+    LEFT OUTER JOIN songs s USING(sid)
+    WHERE p.pid = :num;
+    ''', {"num":playlist})
+
+    # Store all the songs of the playlist in the array songs
+    rows = cursor.fetchall()
+    for row in rows:
+        songs.append(("Song",str(row[0]),row[1], str(row[2])))  
+
+    return songs
+
+def determineContent(tuple,frame):
+    # We find out if the tuple is 1) a Song, 2) an Artist or 3) a Playlist
+    # Then, we call the right function depending on which it is
+    # Argument:
+        # tuple: the tuple containing the information
+    if(tuple[0] == "Song"):
+        # Call songMenu()
+        return
+    elif(tuple[0]== "Playlist"): 
+        clearFrame(frame)
+        displaySongs(songsOfPlaylist(tuple[1]), 0, frame)
+    elif(tuple[0] == "Artist"):
+        clearFrame(frame)
+        displaySongs(songsOfArtist(tuple[5]), 0, frame)
+
+
+def displaySongs(songsArray, pageIndex, frame):
+    size = len(songsArray)
+    # Can scroll through 5 playlist/songs each time
+
+    # Our window
+    global window
+
+    #create display page
+    displayFrame = Frame(window, borderwidth=0)
+    displayFrame.pack()
+
+    # button to return to user page
+    Button(displayFrame, text = "Return", command=lambda: [clearFrame(displayFrame), frame.pack()]).grid(row=0, column=0, padx = 15)
+
+    # Create the 5 slots for the 5 songs
+    if(0 <= pageIndex< size):
+        song = songsArray[pageIndex]
+        Button(displayFrame, text = song[1] + " | " + song[2] + " | " + song[3], command = lambda: songMenu(song,displayFrame)).grid(row=1, column=1, pady = 4)
+    if(0 <= pageIndex +1 < size):
+        song = songsArray[pageIndex+1]
+        Button(displayFrame, text = song[1] + " | " + song[2] + " | " + song[3], command = lambda: songMenu(song,displayFrame)).grid(row=2, column=1, pady = 4)
+    if(0 <= pageIndex +2 < size):
+        song = songsArray[pageIndex+2]
+        Button(displayFrame, text = song[1] + " | " + song[2] + " | " + song[3], command = lambda: songMenu(song,displayFrame)).grid(row=3, column=1, pady = 4)
+    if(0 <= pageIndex + 3 < size):
+        song = songsArray[pageIndex+3]
+        Button(displayFrame, text = song[1] + " | " + song[2] + " | " + song[3], command = lambda: songMenu(song,displayFrame)).grid(row=4, column=1, pady = 4)
+    if(0 <= pageIndex + 4 < size):
+        song = songsArray[pageIndex+4]
+        Button(displayFrame, text = song[1] + " | " + song[2] + " | " + song[3], command = lambda: songMenu(song,displayFrame)).grid(row=5, column=1, pady = 4)
+    
+    # Scroll down button
+    if(pageIndex + 5 < size):
+        Button(displayFrame, text = "Scroll Down", command=lambda: [clearFrame(displayFrame),displaySongs(songsArray,pageIndex+5, frame)]).grid(row=6, column=1, pady = 15)
+    # Scroll up button
+    if(pageIndex - 5 >= 0):
+        Button(displayFrame, text = "Scroll Up", command=lambda: [clearFrame(displayFrame),displaySongs(songsArray,pageIndex-5, frame)]).grid(row=0, column=1, pady = 15)
+
+    # If size = 0, we indicate that no songs returned
+    if(size == 0):
+        Label(displayFrame, text = "No songs to display!").grid(row=1, column=1)
+
+def songMenu(song, frame):
+    # We display the different options that we can with a song
+    # Argument:
+        # Song: song with which we want to interact
+        # frame: the frame from which the song was called
+
+    # Our window
+    global window
+
+    # remove precedent page
+    clearFrame(frame)
+
+    #create menu page
+    MenuFrame = Frame(window, borderwidth=0)
+    MenuFrame.pack()
+    
+    Button(MenuFrame, text = "Return", command=lambda: [clearFrame(MenuFrame), frame.pack()]).grid(row=0, column=0, padx = 15)
+
+    Button(MenuFrame, text = "Listen to the Song", command=lambda: [clearFrame(MenuFrame), listenToSong(song,frame)]).grid(row=0, column=1, pady = 15)
+    Button(MenuFrame, text = "More information about the Song", command=lambda: [clearFrame(MenuFrame), infoAboutSong(song,frame)]).grid(row=1, column=1, pady = 15)
+    Button(MenuFrame, text = "Add the Song to a playlist", command=lambda: [clearFrame(MenuFrame), addSongToPlaylist(song,frame)]).grid(row=2, column=1, pady = 15)
+
+def listenToSong(song,frame):
+    # Our window
+    global window
+
+    #create menu page
+    listenFrame = Frame(window, borderwidth=0)
+    listenFrame.pack()
+
+    # Return to the different options for the song
+    Button(listenFrame, text = "Return", command=lambda: [clearFrame(listenFrame), songMenu(song,frame)]).grid(row=0, column=0, padx = 15)
+
+def infoAboutSong(song,frame):
+    # Our window
+    global window
+    global cursor
+
+    # Format of song: (Type, id, title, duration, number of keywords)
+
+    #create menu page
+    infoFrame = Frame(window, borderwidth=0)
+    infoFrame.pack()
+    
+    # Return to the different options for the song
+    Button(infoFrame, text = "Return", command=lambda: [clearFrame(infoFrame), songMenu(song,frame)]).grid(row=0, column=0, padx = 15)
+
+    # Get following info about the song: artists, id, title, duration, name of playlists it appears in
+    
+    # Get artists names
+    cursor.execute('''
+    SELECT a.name
+    FROM songs s
+    LEFT OUTER JOIN perform p USING(sid)
+    LEFT OUTER JOIN artists a USING(aid)
+    WHERE s.sid LIKE :num;
+    ''', {"num":song[1]})
+
+    artistRows = cursor.fetchall()
+
+    artistString = ""
+    if(cursor.rowcount == 0): artistString = "No Artists"
+    else:
+        artistString += "Artists:\n"
+        for row in artistRows:
+            artistString += row[0] + ", "
+        artistString = artistString[:-2]
+
+    # Get playlists names
+    cursor.execute('''
+    SELECT p.title
+    FROM songs s
+    LEFT OUTER JOIN plinclude pl USING(sid)
+    LEFT OUTER JOIN playlists p USING(pid)
+    WHERE s.sid LIKE :num;
+    ''', {"num":song[1]})
+
+    playlistRows = cursor.fetchall()
+
+    playlistString = ""
+    if(cursor.rowcount == 0): playlistString = "No Playlists"
+    else:
+        playlistString += "Playlists:\n"
+        for row in playlistRows:
+            playlistString += row[0] + ", "
+        playlistString = playlistString[:-2]
+
+    # Display information
+
+    # Display artists
+    Label(infoFrame, text = artistString).grid(row=2, column=1)
+
+    # Display id, title & duration
+    Label(infoFrame, text = "Id:\n" + song[1]).grid(row=3, column=1)
+    Label(infoFrame, text = "Title:\n" + song[2]).grid(row=4, column=1)
+    Label(infoFrame, text = "Duration:\n" + song[3] + " seconds").grid(row=5, column=1)
+
+    # Display playlists
+    Label(infoFrame, text = playlistString).grid(row=6, column=1)
+
+def addSongToPlaylist(song,frame):
+    # Our window
+    global window 
+    # ID of user
+    global id
+    # To access SQL
+    global cursor
+    global connection
+
+    #create menu page
+    addFrame = Frame(window, borderwidth=0)
+    addFrame.pack()
+
+    # Variable to store new playlist name
+    playlistName = tkinter.StringVar()
+
+    # Return to the different options for the song
+    Button(addFrame, text = "Return", command=lambda: [clearFrame(addFrame), songMenu(song,frame)]).grid(row=0, column=0, padx = 15)
+
+
+    # Can choose to add to own playlist
+    buttonIndex = 0 # keep count of all buttons
+    # Find user's playlists
+    cursor.execute('''
+    SELECT p.pid, p.title
+    FROM users u
+    LEFT OUTER JOIN playlists p USING(uid)
+    WHERE u.uid = :uid;
+    ''', {"uid": id})
+
+    playlistRows = cursor.fetchall()
+
+    # We verify that there is at least one playlist assigned to the user, then create a button for each playlist
+    if(playlistRows[0][0] != None):
+        Label(addFrame, text = "Add to existing playlist:").grid(row=0, column=1)
+        for row in playlistRows:
+            Button(addFrame, text = row[1], command = lambda: [insertSongIntoPlaylist(song, row[0])] ).grid(row=1+buttonIndex, column =1)
+            buttonIndex += 1
+
+    # Let user create new playlist if they want
+    
+    Label(addFrame, text = "Add to new playlist:").grid(row=1 +buttonIndex, column=1)
+    Entry(addFrame, textvariable = playlistName).grid(row= 2 +buttonIndex, column=1)
+    Button(addFrame, text = "Add", command = lambda: [insertSongIntoNewPlaylist()]).grid(row= 2 +buttonIndex, column=2)
+
+    def insertSongIntoNewPlaylist():
+        name = playlistName.get()
+        # If an empty string, we don't consider it as an acceptable name
+        if(name == ""): Label(addFrame, text = "Not an accepted name for the new playlist", fg='red').grid(row= 3 +buttonIndex, column=1)
+        else:
+            # Get maximum pid
+            cursor.execute("SELECT MAX(p.pid) FROM playlists p")
+            maxPid = cursor.fetchone()[0]+1
+            # Insert in two necessary tables
+            cursor.execute("INSERT INTO playlists VALUES (:pid, :title, :uid) ", {"pid": maxPid, "title": name, "uid": id})
+            cursor.execute("INSERT INTO plinclude VALUES (:pid, :sid, 1)", {"pid": maxPid, "sid": song[1]})
+            
+            connection.commit()
+
+
+def insertSongIntoPlaylist(song, playlist):
+    # Arguments:
+        # song: song tuple that we want to add to a playlist
+        # playlist: playlist id to whom we want to add a song
+    global cursor
+    global connection
+    cursor.execute("SELECT MAX(pl.sorder) FROM plinclude pl WHERE pl.pid = :pid", {"pid": playlist})
+    order = cursor.fetchone()[0] + 1
+    cursor.execute("INSERT INTO plinclude VALUES (:pid, :sid, :sorder)", {"pid": playlist, "sid": song[1], "sorder": order})
+    
+    connection.commit()
 
 
 ######
@@ -674,6 +914,10 @@ def main():
     # We assumes that the database is in the same folder as the program
     connect("./" + sys.argv[1])
     home()
+    
+    # Save changes in database
+    global connection
+    connection.commit()
     
 if __name__ == "__main__":
     main()
