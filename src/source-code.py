@@ -868,10 +868,11 @@ def addArtistPerform(performs):
     cursor.execute("SELECT max(sid) FROM perform;")
     idrow = cursor.fetchone()
     id = idrow[0] + 1
+    print(id)
 
     for i in performers:
         artist = i
-        cursor.execute(f"SELECT a.aid, s.sid FROM perform p, artists a, songs s WHERE a.name = '{artist}' AND p.aid = a.aid AND s.sid = '{id}''")
+        cursor.execute(f"SELECT a.aid, s.sid FROM perform p, artists a, songs s WHERE a.name = '{artist}' AND p.aid = a.aid AND s.sid = a.sid AND s.sid = '{id}''")
         rows = cursor.fetchone()
         artistid = rows[0]
         songid = rows[1]
