@@ -584,19 +584,10 @@ def artistTupleToString(tuple):
     string = tuple[1] + " | " + tuple[2] + " | " + str(tuple[3]) 
     return string
 
-def songExist():
-    global window
-    
-    #create the page
-    er = Frame(window)
-    er.pack()
-    
-    # create a label to display the message
-    Label(er, font=('Arial',15), text = "Song already exists", fg ='red').grid(row = 0, column = 0)
-    
-    # create a button to return to the home page
-    Button(er, text="return", font=('Arial',15), command=lambda: [clearFrame(er), artistPage()]).grid(row = 1, column= 0)
 
+######
+# If not, the song should be added with a unique id (assigned by your system) and any additional artist who may have 
+# performed the song with their ids obtained from input
 def addSong(new_song):
     song = new_song.get().split(",")
     name = song[0]
@@ -623,6 +614,19 @@ def addSong(new_song):
         Button(er, text="return", command=lambda: [clearFrame(er), artistPage()]).grid(row = 1, column= 0)
     else:
         songExist()
+
+def songExist():
+    global window
+    
+    #create the page
+    er = Frame(window)
+    er.pack()
+    
+    # create a label to display the message
+    Label(er, font=('Arial',15), text = "Song already exists", fg ='red').grid(row = 0, column = 0)
+    
+    # create a button to return to the home page
+    Button(er, text="return", font=('Arial',15), command=lambda: [clearFrame(er), artistPage()]).grid(row = 1, column= 0)
 
 
 def main():
