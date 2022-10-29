@@ -191,25 +191,25 @@ def userPage():
     alreadyL = Label(userFrame, text = "you are already in a listening session", font=('Arial',15), fg='red')
     notListening = Label(userFrame, text="you are not currently in a listening session", font=('Arial',15), fg='red')
         
-    # button to start the session
-    Button(userFrame, text = "start session", fg='white', bg='green', command=lambda: startSession(), font=('Arial',15)).grid(row=0, column=0)
+   # button to start the session
+    Button(userFrame, text = "start session", fg='white', bg='green').grid(row=0, column=0)
     # message to indicate where to enter keywords and the button to search
-    Label(userFrame, text = "enter song/playlist", font=('Arial',15)).grid(row=2, column=0, pady=(20,0))
+    Label(userFrame, text = "enter song/playlist").grid(row=2, column=0, pady=(20,0))
     # We store the keywords in a string variable
-    Entry(userFrame, textvariable = musicKeywords, font=('Arial',15)).grid(row=3, column=0)
+    Entry(userFrame, textvariable = musicKeywords).grid(row=3, column=0)
     # Button to search songs/playlists with keywords
-    Button(userFrame, text = "search for songs or playlists", font=('Arial',15), command=lambda:[clearFrame(userFrame), displaySongsPlaylist(searchSongsAndPlaylists(musicKeywords.get().split()), 0)]).grid(row=4, column=0)
+    Button(userFrame, text = "search for songs or playlists", command=lambda:[clearFrame(userFrame), displaySongsPlaylist(searchSongsAndPlaylists(musicKeywords.get().split()),0)]).grid(row=4, column=0)
     
     # messge to enter keywords to search for artist
-    Label(userFrame, text = "enter artist name", font=('Arial',15)).grid(row=6, column=0, pady=(20,0))
+    Label(userFrame, text = "enter artist name").grid(row=6, column=0, pady=(20,0))
     # We store the keywords in a string variable
-    Entry(userFrame, textvariable = artistKeywords, font=('Arial',15)).grid(row=7, column=0)
+    Entry(userFrame, textvariable = artistKeywords).grid(row=7, column=0)
     # Button to search artists with the keywords
-    Button(userFrame, text = "search for artists", command=lambda:displayArtists(searchArtists(artistKeywords.split())), font=('Arial',15)).grid(row=8, column=0)
+    Button(userFrame, text = "search for artists", command=lambda:[clearFrame(userFrame), displayArtists(searchArtists(artistKeywords.get().split()),0)]).grid(row=8, column=0)
     # button to end the session
-    Button(userFrame, text = "end session", fg='white', bg='red', command=lambda: endSession(), font=('Arial',15)).grid(row=10, column=0, pady=(20,0))
+    Button(userFrame, text = "end session", fg='white', bg='red').grid(row=10, column=0, pady=(20,0))
     # button to logout
-    Button(userFrame, text = "logout", command=lambda: [clearFrame(userFrame), home()], font=('Arial',15)).grid(row=11, column=0, pady=(20,0))
+    Button(userFrame, text = "logout", command=lambda: [clearFrame(userFrame), home()]).grid(row=11, column=0, pady=(20,0))
     
 def choose():
     global window
