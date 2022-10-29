@@ -592,10 +592,10 @@ def songExist():
     er.pack()
     
     # create a label to display the message
-    Label(er, text = "Song already exists", fg ='red').grid(row = 0, column = 0)
+    Label(er, font=('Arial',15), text = "Song already exists", fg ='red').grid(row = 0, column = 0)
     
     # create a button to return to the home page
-    Button(er, text="return", command=lambda: [clearFrame(er), artistPage()]).grid(row = 1, column= 0)
+    Button(er, text="return", font=('Arial',15), command=lambda: [clearFrame(er), artistPage()]).grid(row = 1, column= 0)
 
 def addSong(new_song):
     song = new_song.get().split(",")
