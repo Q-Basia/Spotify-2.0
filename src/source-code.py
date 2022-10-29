@@ -601,6 +601,7 @@ def addSong(new_song):
         id = idrow[0] + 1
         values = [id, name, dur]
         cursor.execute("INSERT INTO songs VALUES (?, ?, ?);", values)
+        # cursor.execute("INSERT INTO perform VALUES (?, ?);",)
         global window
     
         #create the page
@@ -608,12 +609,43 @@ def addSong(new_song):
         er.pack()
         
         # create a label to display the message
-        Label(er, text = "Song has been added", fg ='green').grid(row = 0, column = 0)
+        Label(er, text = "Song has been added", fg ='green', font=('Arial',15)).grid(row = 0, column = 0)
+
+        # message to enter keywords to search for artist
+        Label(er, text = "Enter the artists that performed the song", font=('Arial',15)).grid(row=2, column=0, pady=(20,0))
+
+        performers = tkinter.StringVar()
+        # We store the keywords in a string variable
+        Entry(er, textvariable = performers, font=('Arial',15)).grid(row=3, column=0)
+        Button(er, text="Add Artist", command=lambda: [clearFrame(er), addArtistPerform(performers)]).grid(row = 4, column = 0)
         
-        # create a button to return to the home page
-        Button(er, text="return", command=lambda: [clearFrame(er), artistPage()]).grid(row = 1, column= 0)
+        
     else:
         songExist()
+
+def addArtistPerform(performs):
+    performers = performs.get().split(",")
+    cursor.execute("SELECT max(sid) FROM perform;")
+    idrow = cursor.fetchone()
+    id = idrow[0] + 1
+
+    for i in performers:
+        artist = i
+        cursor.execute(f"SELECT a.aid, s.sid FROM perform p, artists a, songs s WHERE a.name = '{artist}' AND p.aid = a.aid AND s.sid = '{id}''")
+        rows = cursor.fetchone()
+        artistid = rows[0]
+        songid = rows[1]
+        values = [artistid, songid]
+        cursor.execute(f"INSERT INTO perform VALUES (?, ?);", values)
+
+    connPerformer = Frame(window)
+    connPerformer.pack()
+
+    Label(connPerformer, text = f"You have finished adding the details of the newvsong ", fg = 'green', font = ('Arial',15)).grid(row=0, column =0)
+
+    # create a button to return to the home page
+    Button(connPerformer, text="Return", command=lambda: [clearFrame(connPerformer), artistPage()]).grid(row = 1, column= 0)
+
 
 def songExist():
     global window
