@@ -211,8 +211,8 @@ def userPage():
     # button to end the session
     Button(userFrame, text = "end session", fg='white', bg='red', command=lambda: endSession(), font=('Arial',15)).grid(row=10, column=0, pady=(20,0))
     # button to logout
-    Button(userFrame, text = "logout", command=lambda: [clearFrame(userFrame), home()], font=('Arial',15)).grid(row=11, column=0, pady=(20,0))
-    
+    Button(userFrame, text = "logout", command=lambda: [endSession(), clearFrame(userFrame), home()], font=('Arial',15)).grid(row=11, column=0, pady=(20,0))
+    Button(userFrame, text = "EXIT", font=('Arial',15), command=lambda: [endSession(), reset(), window.destroy()]).grid(row=12, column=0, pady=(20,0))
 def choose():
     global window
     chooseF = Frame(window, bg='gray')
@@ -602,8 +602,8 @@ def determineContent(tuple,frame):
     # Argument:
         # tuple: the tuple containing the information
     if(tuple[0] == "Song"):
-        # Call songMenu()
-        return
+        clearFrame(frame)
+        songMenu(tuple, frame)
     elif(tuple[0]== "Playlist"): 
         clearFrame(frame)
         displaySongs(songsOfPlaylist(tuple[1]), 0, frame)
@@ -672,20 +672,50 @@ def songMenu(song, frame):
     
     Button(MenuFrame, text = "Return", command=lambda: [clearFrame(MenuFrame), frame.pack()]).grid(row=0, column=0, padx = 15)
 
-    Button(MenuFrame, text = "Listen to the Song", command=lambda: [clearFrame(MenuFrame), listenToSong(song,frame)]).grid(row=0, column=1, pady = 15)
+    Button(MenuFrame, text = "Listen to the Song", command=lambda: [listenToSong(song)]).grid(row=0, column=1, pady = 15)
     Button(MenuFrame, text = "More information about the Song", command=lambda: [clearFrame(MenuFrame), infoAboutSong(song,frame)]).grid(row=1, column=1, pady = 15)
     Button(MenuFrame, text = "Add the Song to a playlist", command=lambda: [clearFrame(MenuFrame), addSongToPlaylist(song,frame)]).grid(row=2, column=1, pady = 15)
 
-def listenToSong(song,frame):
+def listenToSong(song):
+    # WIP!
     # Our window
     global window
 
-    #create menu page
-    listenFrame = Frame(window, borderwidth=0)
-    listenFrame.pack()
+    # Check if a listening session has been started.
+    # If yes; continue. If not, start a session
+    global listening, connection, cursor, sno, id
+    if listening == False:
+        listening = True 
+        cursor.execute('''SELECT MAX(sno) FROM sessions WHERE uid = :num;''', {"num": id})
+        top_sno = cursor.fetchone()
+        if not top_sno[0]:
+            sno = 1
+        else:
+            sno = top_sno[0] + 1
+        cursor.execute('''INSERT INTO sessions VALUES (:id, :sno, date(), null);''', {"id":id, "sno": sno})
+        connection.commit()
 
-    # Return to the different options for the song
-    Button(listenFrame, text = "Return", command=lambda: [clearFrame(listenFrame), songMenu(song,frame)]).grid(row=0, column=0, padx = 15)
+    # Check if the song was previously listened by user in the same session
+    # (Find it in listen table)
+    # If not, create a new row. If yes, augment count by 1
+    cursor.execute('''
+    SELECT cnt from listen WHERE uid = :uid AND sno = :sno AND sid = :sid
+    ''', {"uid": id, "sno": sno, "sid": song[1]})
+
+    songCount = cursor.fetchone()
+    if(songCount == None):
+            cursor.execute(''' 
+            INSERT INTO listen VALUES (:uid, :sno, :sid, 1);
+            ''', {"uid": id, "sno": sno, "sid": song[1]})
+    else:
+        cursor.execute('''
+        UPDATE listen
+        SET count = count + 1
+        WHERE uid = :uid AND sno = :sno AND sid = :sid
+        ''', {"uid": id, "sno": sno, "sid": song[1]})
+    
+
+    connection.commit()
 
 def infoAboutSong(song,frame):
     # Our window
@@ -747,9 +777,9 @@ def infoAboutSong(song,frame):
     Label(infoFrame, text = artistString).grid(row=2, column=1)
 
     # Display id, title & duration
-    Label(infoFrame, text = "Id:\n" + song[1]).grid(row=3, column=1)
+    Label(infoFrame, text = "Id:\n" + str(song[1])).grid(row=3, column=1)
     Label(infoFrame, text = "Title:\n" + song[2]).grid(row=4, column=1)
-    Label(infoFrame, text = "Duration:\n" + song[3] + " seconds").grid(row=5, column=1)
+    Label(infoFrame, text = "Duration:\n" + str(song[3]) + " seconds").grid(row=5, column=1)
 
     # Display playlists
     Label(infoFrame, text = playlistString).grid(row=6, column=1)
@@ -786,11 +816,14 @@ def addSongToPlaylist(song,frame):
 
     playlistRows = cursor.fetchall()
 
+    print(playlistRows)
+
     # We verify that there is at least one playlist assigned to the user, then create a button for each playlist
     if(playlistRows[0][0] != None):
         Label(addFrame, text = "Add to existing playlist:").grid(row=0, column=1)
-        for row in playlistRows:
-            Button(addFrame, text = row[1], command = lambda: [insertSongIntoPlaylist(song, row[0])] ).grid(row=1+buttonIndex, column =1)
+        for pRow in playlistRows:
+            print(pRow[0])
+            Button(addFrame, text = pRow[1], command = lambda pRow = pRow: [insertSongIntoPlaylist(song, pRow[0])] ).grid(row=1+buttonIndex, column =1)
             buttonIndex += 1
 
     # Let user create new playlist if they want
@@ -820,10 +853,18 @@ def insertSongIntoPlaylist(song, playlist):
         # playlist: playlist id to whom we want to add a song
     global cursor
     global connection
+
+    # Get next "sorder" of playlist
     cursor.execute("SELECT MAX(pl.sorder) FROM plinclude pl WHERE pl.pid = :pid", {"pid": playlist})
     order = cursor.fetchone()[0] + 1
-    cursor.execute("INSERT INTO plinclude VALUES (:pid, :sid, :sorder)", {"pid": playlist, "sid": song[1], "sorder": order})
-    
+
+    # Verify that this song was not inserted before
+    cursor.execute("SELECT pl.sid FROM plinclude pl WHERE pl.pid = :pid AND pl.sid = :sid", {"pid": playlist, "sid": song[1]})
+    if(cursor.fetchone() == None):
+        cursor.execute("INSERT INTO plinclude VALUES (:pid, :sid, :sorder)", {"pid": playlist, "sid": song[1], "sorder": order})
+    else:
+        print("Already in playlist!")
+
     connection.commit()
 
 
