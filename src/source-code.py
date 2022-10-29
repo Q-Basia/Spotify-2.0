@@ -1,4 +1,5 @@
 # This will be our source code
+from ast import Delete
 import sqlite3
 import tkinter 
 from tkinter import *
@@ -29,6 +30,7 @@ def connect(path):
 
     connection = sqlite3.connect(path)
     cursor = connection.cursor()
+    cursor.execute('''DELETE from songs where sid > 48''')
     return      
     
 # this function removes all widgets that were created for the specified page
@@ -837,11 +839,10 @@ def addSong(new_song):
     
     if not row:
         cursor.execute("SELECT max(sid) FROM songs;")
-        idrow = cursor.fetchone()
-        id = idrow[0] + 1
-        values = [id, name, dur]
+        s_idrow = cursor.fetchone()
+        s_id = s_idrow[0] + 1
+        values = [s_id, name, dur]
         cursor.execute("INSERT INTO songs VALUES (?, ?, ?);", values)
-        # cursor.execute("INSERT INTO perform VALUES (?, ?);",)
         global window
     
         #create the page
@@ -865,14 +866,13 @@ def addSong(new_song):
 
 def addArtistPerform(performs):
     performers = performs.get().split(",")
+
     cursor.execute("SELECT max(sid) FROM perform;")
     idrow = cursor.fetchone()
-    id = idrow[0] + 1
-    print(id)
+    p_id = idrow[0] + 1
 
-    for i in performers:
-        artist = i
-        cursor.execute(f"SELECT a.aid, s.sid FROM perform p, artists a, songs s WHERE a.name = '{artist}' AND p.aid = a.aid AND s.sid = a.sid AND s.sid = '{id}''")
+    for artist in performers:
+        cursor.execute(f"SELECT a.aid, s.sid FROM perform p, artists a, songs s WHERE a.name = '{artist}' AND p.aid = a.aid AND p.sid = s.sid AND s.sid = '{p_id}';")
         rows = cursor.fetchone()
         artistid = rows[0]
         songid = rows[1]
@@ -886,7 +886,6 @@ def addArtistPerform(performs):
 
     # create a button to return to the home page
     Button(connPerformer, text="Return", command=lambda: [clearFrame(connPerformer), artistPage()]).grid(row = 1, column= 0)
-
 
 def songExist():
     global window
