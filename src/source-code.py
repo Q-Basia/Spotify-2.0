@@ -872,6 +872,7 @@ def addnewSong():
     # input box for the song details, must be name followed by suration
     Entry(new, textvariable = new_song, font=('Arial',15)).grid(row=1, column=0)
     Button(new,text="Add Song", font = ('Arial',15), command=lambda:[clearFrame(new), addSong(new_song)]).grid(row=2, column=0)
+    Button(new, text="Back", fg='red', bg='gray',command=lambda: [clearFrame(new), artistPage()], font=('Arial',15)).grid(row=6)
     
 
 ######
@@ -906,8 +907,7 @@ def addSong(new_song):
         performers = tkinter.StringVar()
         # We store the keywords in a string variable
         Entry(er, textvariable = performers, font=('Arial',15)).grid(row=3, column=0)
-        Button(er, text="Add Artist", command=lambda: [clearFrame(er), addArtistPerform(performers, s_id)]).grid(row = 4, column = 0)
-        
+        Button(er, text="Add Artist(s)", command=lambda: [clearFrame(er), addArtistPerform(performers, s_id)]).grid(row = 4, column = 0)        
     else:
         songExist()
 
@@ -961,6 +961,9 @@ def findTop():
     Button(new,text="Top Users", font = ('Arial',15), command=lambda:[clearFrame(new), topusers()]).grid(row=0, column=0)
 
     Button(new,text="Top Playlists", font = ('Arial',15), command=lambda:[clearFrame(new), topplaylists()]).grid(row=1, column=0)
+
+    Button(new, text="Back", fg='red', bg='gray',command=lambda: [clearFrame(new), artistPage()], font=('Arial',15)).grid(row=6)
+
     
 def topusers():
     global connection, cursor, id
@@ -969,7 +972,9 @@ def topusers():
 def topplaylists():
     global connection, cursor, id
 
-    cursor.execute('''SELECT ''')
+    cursor.execute('''SELECT * 
+                        FROM playlists p, plinclude pl  
+                        WHERE ''')
 
 
 
