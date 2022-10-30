@@ -127,23 +127,15 @@ def registerPage():
 # no argument or return value
 def artistPage():
     global window 
-    
-    # initiate value for if the artist wants to add a song
-    new_song = tkinter.StringVar()
-    
+        
     # create page
     artistFrame = Frame(window)
     artistFrame.pack()
     
-    # label to tell the artist where to enter values of new song
-    Label(artistFrame, text="please enter name and duration of song in seconds, respectively", font=('Arial',15)).grid(row=0, column=0)
-    # input box for the song details, must be name followed by suration
-    Entry(artistFrame, textvariable = new_song, font=('Arial',15)).grid(row=1, column=0)
-    
     # buttons to add the song, find top users and top playlists, logout and exit the program
-    Button(artistFrame, text = "add song", font=('Arial',15), command=lambda: [clearFrame(artistFrame), addSong(new_song)]).grid(row=2, column=0, pady=(0,20))
-    Button(artistFrame, text = "find top users", font=('Arial',15), command=lambda: [clearFrame(artistFrame)]).grid(row=3, column=0)
-    Button(artistFrame, text = "logout", font=('Arial',15), command=lambda: [clearFrame(artistFrame), reset(), home()]).grid(row=5, column=0, pady=(20,0))
+    Button(artistFrame, text = "New song", font=('Arial',15), command=lambda: [clearFrame(artistFrame), addnewSong()]).grid(row=2, column=0, pady=(0,20))
+    Button(artistFrame, text = "Find Top 3's", font=('Arial',15), command=lambda: [clearFrame(artistFrame), findTop()]).grid(row=3, column=0)
+    Button(artistFrame, text = "Logout", font=('Arial',15), command=lambda: [clearFrame(artistFrame), reset(), home()]).grid(row=5, column=0, pady=(20,0))
     Button(artistFrame, text = "EXIT", font=('Arial',15), command=lambda: [reset(), window.destroy()]).grid(row=6, column=0, pady=(20,0))
 
 # creates a page that contains all the actions a user can take on the app
@@ -227,12 +219,12 @@ def Validate(u):
     passP = Frame(window)
     passP.pack()
     new_ps = tkinter.StringVar()
-    Label(passP, text="enter your password below", font=('Arial',15)).grid(row=0, columnspan=3)
-    wP = Label(passP, text="password is incorrect, please try again", fg='red')
-    Label(passP, text = "password", font=('Arial',15)).grid(row=1, column=0)
-    Entry(passP, textvariable=new_ps, show="*", font=('Arial',15)).grid(row=1, column=1)
-    Button(passP, text="login", command=lambda:[setPs(new_ps), test()], font=('Arial',15)).grid(row=2, column=0)
-    Button(passP, text="back", command=lambda: [clearFrame(passP), choose()], font=('Arial',15)).grid(row=3, column=0)
+    Label(passP, text="enter your password below", font=('Arial',15)).grid(row=1, columnspan=3)
+    wP = Label(passP, text="Password is incorrect, please try again", fg='red')
+    Label(passP, text = "password", font=('Arial',15)).grid(row=2, column=0)
+    Entry(passP, textvariable=new_ps, show="*", font=('Arial',15)).grid(row=2, column=1)
+    Button(passP, text="login", command=lambda:[setPs(new_ps), test()], font=('Arial',15)).grid(row=3, column=0)
+    Button(passP, text="back", command=lambda: [clearFrame(passP), choose()], font=('Arial',15)).grid(row=4, column=0)
     def test():
         if u == "artist":
             cursor.execute('''SELECT 'True'
@@ -868,6 +860,20 @@ def insertSongIntoPlaylist(song, playlist):
     connection.commit()
 
 
+def addnewSong():
+    global window, connection
+    new = Frame(window)
+    new.pack()
+
+    new_song = tkinter.StringVar()
+
+    # label to tell the artist where to enter values of new song
+    Label(new, text="Please enter name and duration of song in seconds, seperated by a comma", font=('Arial',15)).grid(row=0, column=0)
+    # input box for the song details, must be name followed by suration
+    Entry(new, textvariable = new_song, font=('Arial',15)).grid(row=1, column=0)
+    Button(new,text="Add Song", font = ('Arial',15), command=lambda:[clearFrame(new), addSong(new_song)]).grid(row=2, column=0)
+    
+
 ######
 # If not, the song should be added with a unique id (assigned by your system) and any additional artist who may have 
 # performed the song with their ids obtained from input
@@ -892,6 +898,7 @@ def addSong(new_song):
         #create the page
         er = Frame(window)
         er.pack()
+
 
         # message to enter keywords to search for artist
         Label(er, text = "Enter the artists that performed the song", font=('Arial',15)).grid(row=2, column=0, pady=(20,0))
@@ -945,6 +952,28 @@ def songExist():
     # create a button to return to the home page
     Button(er, text="return", font=('Arial',15), command=lambda: [clearFrame(er), artistPage()]).grid(row = 1, column= 0)
 
+
+def findTop():
+    global window, connection
+    new = Frame(window)
+    new.pack()
+    
+    Button(new,text="Top Users", font = ('Arial',15), command=lambda:[clearFrame(new), topusers()]).grid(row=0, column=0)
+
+    Button(new,text="Top Playlists", font = ('Arial',15), command=lambda:[clearFrame(new), topplaylists()]).grid(row=1, column=0)
+    
+def topusers():
+    global connection, cursor, id
+    
+#top 3 playlists that include the largest number of their songs
+def topplaylists():
+    global connection, cursor, id
+
+    cursor.execute('''SELECT ''')
+
+
+
+    
 
 def main():
     '''
