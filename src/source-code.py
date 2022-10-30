@@ -1,5 +1,5 @@
 # This will be our source code
-from ast import Delete
+from ast import Delete, Pass
 import sqlite3
 import tkinter 
 from tkinter import *
@@ -917,8 +917,11 @@ def addArtistPerform(performs, s_id):
     for artist in performers:
         values = [artist, s_id]
 
-        cursor.execute(f"INSERT INTO perform VALUES (?, ?);", values)
-        connection.commit()
+        if (artist == ""):
+            Pass
+        else:
+            cursor.execute(f"INSERT INTO perform VALUES (?, ?);", values)
+            connection.commit()
 
     connPerformer = Frame(window)
     connPerformer.pack()
