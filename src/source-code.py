@@ -30,7 +30,6 @@ def connect(path):
 
     connection = sqlite3.connect(path)
     cursor = connection.cursor()
-    cursor.execute('''DELETE from songs where sid > 48''')
     return      
     
 # this function removes all widgets that were created for the specified page
@@ -213,6 +212,7 @@ def userPage():
     # button to logout
     Button(userFrame, text = "logout", command=lambda: [endSession(), clearFrame(userFrame), home()], font=('Arial',15)).grid(row=11, column=0, pady=(20,0))
     Button(userFrame, text = "EXIT", font=('Arial',15), command=lambda: [endSession(), reset(), window.destroy()]).grid(row=12, column=0, pady=(20,0))
+
 def choose():
     global window
     chooseF = Frame(window, bg='gray')
@@ -872,6 +872,9 @@ def insertSongIntoPlaylist(song, playlist):
 # If not, the song should be added with a unique id (assigned by your system) and any additional artist who may have 
 # performed the song with their ids obtained from input
 def addSong(new_song):
+    global window
+    global connection
+
     song = new_song.get().split(",")
     name = song[0]
     dur = song[1]
@@ -884,14 +887,11 @@ def addSong(new_song):
         s_id = s_idrow[0] + 1
         values = [s_id, name, dur]
         cursor.execute("INSERT INTO songs VALUES (?, ?, ?);", values)
-        global window
+        connection.commit()
     
         #create the page
         er = Frame(window)
         er.pack()
-        
-        # create a label to display the message
-        Label(er, text = "Song has been added", fg ='green', font=('Arial',15)).grid(row = 0, column = 0)
 
         # message to enter keywords to search for artist
         Label(er, text = "Enter the artists that performed the song", font=('Arial',15)).grid(row=2, column=0, pady=(20,0))
@@ -899,31 +899,32 @@ def addSong(new_song):
         performers = tkinter.StringVar()
         # We store the keywords in a string variable
         Entry(er, textvariable = performers, font=('Arial',15)).grid(row=3, column=0)
-        Button(er, text="Add Artist", command=lambda: [clearFrame(er), addArtistPerform(performers)]).grid(row = 4, column = 0)
-        
+        Button(er, text="Add Artist", command=lambda: [clearFrame(er), addArtistPerform(performers, s_id)]).grid(row = 4, column = 0)
         
     else:
         songExist()
 
-def addArtistPerform(performs):
+
+def addArtistPerform(performs, s_id):
+    global window, connection, cursor, id
+
+    first_value = [id, s_id]
+    cursor.execute(f"INSERT INTO perform VALUES (?, ?);", first_value)
+    connection.commit()
+
     performers = performs.get().split(",")
-
-    cursor.execute("SELECT max(sid) FROM perform;")
-    idrow = cursor.fetchone()
-    p_id = idrow[0] + 1
-
+    
     for artist in performers:
-        cursor.execute(f"SELECT a.aid, s.sid FROM perform p, artists a, songs s WHERE a.name = '{artist}' AND p.aid = a.aid AND p.sid = s.sid AND s.sid = '{p_id}';")
-        rows = cursor.fetchone()
-        artistid = rows[0]
-        songid = rows[1]
-        values = [artistid, songid]
+        values = [artist, s_id]
+
         cursor.execute(f"INSERT INTO perform VALUES (?, ?);", values)
+        connection.commit()
 
     connPerformer = Frame(window)
     connPerformer.pack()
 
-    Label(connPerformer, text = f"You have finished adding the details of the newvsong ", fg = 'green', font = ('Arial',15)).grid(row=0, column =0)
+    # create a label to display the message
+    Label(connPerformer, text = "Song has been added", fg ='green', font=('Arial',15)).grid(row = 0, column = 0)
 
     # create a button to return to the home page
     Button(connPerformer, text="Return", command=lambda: [clearFrame(connPerformer), artistPage()]).grid(row = 1, column= 0)
