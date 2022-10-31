@@ -916,7 +916,7 @@ def addArtistPerform(performs, s_id):
     global window, connection, cursor, id
 
     first_value = [id, s_id]
-    cursor.execute(f"INSERT INTO perform VALUES (?, ?);", first_value)
+    cursor.execute("INSERT INTO perform VALUES (?, ?);", first_value)
     connection.commit()
 
     performers = performs.get().split(",")
@@ -958,23 +958,47 @@ def findTop():
     new = Frame(window)
     new.pack()
     
-    Button(new,text="Top Users", font = ('Arial',15), command=lambda:[clearFrame(new), topusers()]).grid(row=0, column=0)
+    Button(new,text="Top Users", font = ('Arial',15), command=lambda:[clearFrame(new), displayTopusers()]).grid(row=0, column=0)
 
-    Button(new,text="Top Playlists", font = ('Arial',15), command=lambda:[clearFrame(new), topplaylists()]).grid(row=1, column=0)
+    Button(new,text="Top Playlists", font = ('Arial',15), command=lambda:[clearFrame(new), displayTopplaylists()]).grid(row=1, column=0)
 
     Button(new, text="Back", fg='red', bg='gray',command=lambda: [clearFrame(new), artistPage()], font=('Arial',15)).grid(row=6)
 
-    
-def topusers():
-    global connection, cursor, id
+
+    # The artist should be able to list top 3 users who listen to their songs the longest time
+def displayTopusers():
+    global connection, cursor, id, window
+
+    # cursor.execute(f"SELECT s.sid FROM songs s, perform p, artists a WHERE p.aid=a.aid AND p.sid=s.sid AND a.aid = '{id}' GROUP BY s.sid;")
+    # s_idrow = cursor.fetchall()
+    cursor.execute(f'''SELECT u.name FROM users u, listen l, songs s 
+                    WHERE u.uid=l.uid AND l.sid IN (SELECT s1.sid FROM songs s1, perform p, artists a 
+                                                    WHERE p.aid=a.aid AND p.sid=s1.sid AND a.aid = '{id}' GROUP BY s1.sid) 
+                    GROUP BY u.name ORDER BY SUM(l.cnt*s.duration) DESC LIMIT 3;''')
+    username = cursor.fetchall()
+
+    # cursor.execute("SELECT distinct u.name FROM users u, listen l, song s, perform p WHERE ")
+
+
+    #create display page
+    displayFrame = Frame(window, borderwidth=0)
+    displayFrame.pack()
+
+    lenTop = [1, 2, 3]
+
+    for i in range(0, len(username)):
+        Label(displayFrame, text=username[i][0], font=('Arial',15)).grid(row=i, column=0)
+
+    Button(displayFrame, text = "Return", command=lambda: [clearFrame(displayFrame), artistPage()]).grid(row=5, column=0, padx = 15)
+
     
 #top 3 playlists that include the largest number of their songs
-def topplaylists():
+def displayTopplaylists():
     global connection, cursor, id
 
-    cursor.execute('''SELECT * 
-                        FROM playlists p, plinclude pl  
-                        WHERE ''')
+    cursor.execute('''  SELECT p.int, p.sid, p.uid 
+                        FROM playlists p, plinclude pl, songs s, artist a 
+                        WHERE pl. ''')
 
 
 
