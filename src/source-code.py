@@ -300,6 +300,7 @@ def home():
     window.mainloop()
 
 
+
 def searchSongsAndPlaylists(currentKeywords):
     # Arguments: 
     #   currentKeywords: an array of string containing the keywords of the search
@@ -411,6 +412,7 @@ def searchArtists(currentKeywords):
     # Format of each entry of result: (Type, Name, Nationality, Number of songs, Number of Keywords, Artist ID)
     return result
 
+# Small function to return the Number of Keyworsd from an artist tuple (for ordering purposes)
 def artistTupleGetKeyWord(tuple):
     return tuple[4]  
 
@@ -421,7 +423,6 @@ def countKeywords(title):
     # Returns:
     #   count: number of keywords in the title
 
-    # Testing Purpose [DELETE]
     global keywords
 
     count = 0 # number of keywords
@@ -441,6 +442,10 @@ def countKeywords(title):
 
 
 def displaySongsPlaylist(musicArray, pageIndex):
+    # We display as buttons all of the playlist and songs that were passed, offering additional options for each type
+    # Arguments: 
+    #   musicArray: an array containing both playlist and song tuples
+
     # Format of each entry of result: (Type, id, title, duration, number of keywords)
     
     size = len(musicArray)
@@ -491,6 +496,10 @@ def musicTupleToString(tuple):
     
 
 def displayArtists(artistArray, pageIndex):
+    # We display all of the artist tuples in the artist array as buttons, each allowing more options regarding the artist
+        # Arguments: 
+    #   artistArray: an array containing artist tuples
+
     # Format of each entry of artistArray: (Type, Name, Nationality, Number of songs, Number of Keywords, Artist ID)
     size = len(artistArray)
     # Can scroll through 5 playlist/songs each time
@@ -539,6 +548,7 @@ def artistTupleToString(tuple):
     return string
 
 def songsOfArtist(artist):
+    # Get all songs of an artist
     # Arguments:
     #   artist: A string indicating the aid of the artist
     # Returns:
@@ -565,6 +575,7 @@ def songsOfArtist(artist):
     return songs
 
 def songsOfPlaylist(playlist):
+    # Get all songs of a laylist
     # Arguments:
     #   playlist: A string indicating the pid of the playlist
     # Returns:
@@ -595,18 +606,26 @@ def determineContent(tuple,frame):
         # tuple: the tuple containing the information
     if(tuple[0] == "Song"):
         clearFrame(frame)
+        # Display options for the song
         songMenu(tuple, frame)
     elif(tuple[0]== "Playlist"): 
         clearFrame(frame)
+        # We display all songs of playlist
         displaySongs(songsOfPlaylist(tuple[1]), 0, frame)
     elif(tuple[0] == "Artist"):
         clearFrame(frame)
+        # Display all songs of artist
         displaySongs(songsOfArtist(tuple[5]), 0, frame)
 
 
 def displaySongs(songsArray, pageIndex, frame):
+    # We display each song as a button, with 5 songs max per page (we can scroll up or down if there is more). Each button allow for more options regarding the song
+    # Arguments:
+        # songsArray: array containing all the song tuples
+        # pageIndex: Indicates which page (of 5 songs) we are displaying in respect to the list of songs
+        # frame: The frame on which we were on previously, before displaying all the songs
+
     size = len(songsArray)
-    # Can scroll through 5 playlist/songs each time
 
     # Our window
     global window
@@ -669,7 +688,10 @@ def songMenu(song, frame):
     Button(MenuFrame, text = "Add the Song to a playlist", command=lambda: [clearFrame(MenuFrame), addSongToPlaylist(song,frame)]).grid(row=2, column=1, pady = 15)
 
 def listenToSong(song):
-    # WIP!
+    # We store it in our database when a user listens to a song (what time, which song)
+    # Argument:
+        # song: the song tuple the user wants to listen to
+
     # Our window
     global window
 
@@ -706,10 +728,15 @@ def listenToSong(song):
         WHERE uid = :uid AND sno = :sno AND sid = :sid
         ''', {"uid": id, "sno": sno, "sid": song[1]})
     
-
+    # Save result in DB
     connection.commit()
 
 def infoAboutSong(song,frame):
+    # Gives more info about a song that the user selected
+    # Arguments:
+        # song: the song tuple on which we want more information
+        # frame: the frame on which we were on previously
+
     # Our window
     global window
     global cursor
@@ -744,7 +771,7 @@ def infoAboutSong(song,frame):
             artistString += row[0] + ", "
         artistString = artistString[:-2]
 
-    # Get playlists names
+    # Get all playlists names
     cursor.execute('''
     SELECT p.title
     FROM songs s
@@ -777,6 +804,11 @@ def infoAboutSong(song,frame):
     Label(infoFrame, text = playlistString).grid(row=6, column=1)
 
 def addSongToPlaylist(song,frame):
+    # A user selects a song and adds it to a playlist of their choice
+    # Arguments:
+        # song:  the song the user wants to add to a playlist
+        # frame: the frame we were on previously, before wanting to add a playlist
+        
     # Our window
     global window 
     # ID of user
@@ -808,8 +840,6 @@ def addSongToPlaylist(song,frame):
 
     playlistRows = cursor.fetchall()
 
-    print(playlistRows)
-
     # We verify that there is at least one playlist assigned to the user, then create a button for each playlist
     if(playlistRows[0][0] != None):
         Label(addFrame, text = "Add to existing playlist:").grid(row=0, column=1)
@@ -820,11 +850,13 @@ def addSongToPlaylist(song,frame):
 
     # Let user create new playlist if they want
     
-    Label(addFrame, text = "Add to new playlist:").grid(row=1 +buttonIndex, column=1)
+    Label(addFrame, text = "Add to new playlist:").grid(row=1 +buttonIndex, column=1) #prompt
     Entry(addFrame, textvariable = playlistName).grid(row= 2 +buttonIndex, column=1)
     Button(addFrame, text = "Add", command = lambda: [insertSongIntoNewPlaylist()]).grid(row= 2 +buttonIndex, column=2)
 
     def insertSongIntoNewPlaylist():
+        # to insert a song into a new playlist
+
         name = playlistName.get()
         # If an empty string, we don't consider it as an acceptable name
         if(name == ""): Label(addFrame, text = "Not an accepted name for the new playlist", fg='red').grid(row= 3 +buttonIndex, column=1)
@@ -840,9 +872,11 @@ def addSongToPlaylist(song,frame):
 
 
 def insertSongIntoPlaylist(song, playlist):
+    # We add a song into an already existing playlist
     # Arguments:
         # song: song tuple that we want to add to a playlist
         # playlist: playlist id to whom we want to add a song
+
     global cursor
     global connection
 
@@ -857,23 +891,8 @@ def insertSongIntoPlaylist(song, playlist):
     else:
         print("Already in playlist!")
 
-    connection.commit()
-
-
-def addnewSong():
-    global window, connection
-    new = Frame(window)
-    new.pack()
-
-    new_song = tkinter.StringVar()
-
-    # label to tell the artist where to enter values of new song
-    Label(new, text="Please enter name and duration of song in seconds, seperated by a comma", font=('Arial',15)).grid(row=0, column=0)
-    # input box for the song details, must be name followed by suration
-    Entry(new, textvariable = new_song, font=('Arial',15)).grid(row=1, column=0)
-    Button(new,text="Add Song", font = ('Arial',15), command=lambda:[clearFrame(new), addSong(new_song)]).grid(row=2, column=0)
-    Button(new, text="Back", fg='red', bg='gray',command=lambda: [clearFrame(new), artistPage()], font=('Arial',15)).grid(row=6)
-    
+    # Save to DB
+    connection.commit() 
 
 ######
 # If not, the song should be added with a unique id (assigned by your system) and any additional artist who may have 
