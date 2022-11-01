@@ -893,7 +893,7 @@ def insertSongIntoPlaylist(song, playlist):
 
     # Save to DB
     connection.commit() 
-    
+
 def addnewSong():
     global window, connection
     new = Frame(window)
@@ -1004,10 +1004,11 @@ def displayTopusers():
 
     # cursor.execute(f"SELECT s.sid FROM songs s, perform p, artists a WHERE p.aid=a.aid AND p.sid=s.sid AND a.aid = '{id}' GROUP BY s.sid;")
     # s_idrow = cursor.fetchall()
-    cursor.execute(f'''SELECT u.name FROM users u, listen l, songs s 
-                    WHERE u.uid=l.uid AND l.sid IN (SELECT s1.sid FROM songs s1, perform p, artists a 
-                                                    WHERE p.aid=a.aid AND p.sid=s1.sid AND a.aid = '{id}' GROUP BY s1.sid) 
-                    GROUP BY u.name ORDER BY SUM(l.cnt*s.duration) DESC LIMIT 3;''')
+    cursor.execute(f''' SELECT u.name FROM users u, listen l, songs s 
+                        WHERE u.uid=l.uid AND l.sid IN (SELECT s1.sid 
+                                                        FROM songs s1, perform p, artists a 
+                                                        WHERE p.aid=a.aid AND p.sid=s1.sid AND a.aid = '{id}' GROUP BY s1.sid) 
+                        GROUP BY u.name ORDER BY SUM(l.cnt*s.duration) DESC LIMIT 3;''')
     username = cursor.fetchall()
 
     # cursor.execute("SELECT distinct u.name FROM users u, listen l, song s, perform p WHERE ")
@@ -1016,8 +1017,6 @@ def displayTopusers():
     #create display page
     displayFrame = Frame(window, borderwidth=0)
     displayFrame.pack()
-
-    lenTop = [1, 2, 3]
 
     for i in range(0, len(username)):
         Label(displayFrame, text=username[i][0], font=('Arial',15)).grid(row=i, column=0)
@@ -1029,12 +1028,31 @@ def displayTopusers():
 def displayTopplaylists():
     global connection, cursor, id
 
-    cursor.execute('''  SELECT p.int, p.sid, p.uid 
-                        FROM playlists p, plinclude pl, songs s, artist a 
-                        WHERE pl. ''')
+    cursor.execute(f''' SELECT p.title, count(pl.sid) 
+                        FROM playlists p, plinclude pl, songs s, artists a, perform pe
+                        WHERE pe.sid=pl.sid AND pe.aid=a.aid AND pl.pid=p.pid AND pl.sid IN (SELECT s1.sid 
+                                                                                             FROM songs s1, perform p, artists a 
+                                                                                             WHERE p.aid=a.aid AND p.sid=s1.sid AND a.aid = '{id}' GROUP BY s1.sid)
+
+                        GROUP BY p.pid, p.title, p.uid
+                        ORDER BY COUNT(s.sid)
+                        DESC LIMIT 3;''')
+    
+    playlistname = cursor.fetchall()
+
+    # cursor.execute("SELECT distinct u.name FROM users u, listen l, song s, perform p WHERE ")
 
 
+    #create display page
+    displayFrame = Frame(window, borderwidth=0)
+    displayFrame.pack()
 
+    for i in range(0, len(playlistname)):
+        Label(displayFrame, text=playlistname[i][0], font=('Arial',15)).grid(row=i, column=0)
+        Label(displayFrame, text=playlistname[i][1], font=('Arial',15)).grid(row=i, column=1)
+        # Label(displayFrame, text=playlistname[i][2], font=('Arial',15)).grid(row=i, column=2)
+
+    Button(displayFrame, text = "Return", command=lambda: [clearFrame(displayFrame), artistPage()]).grid(row=5, column=0, padx = 15)
     
 
 def main():
