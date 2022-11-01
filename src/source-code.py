@@ -724,7 +724,7 @@ def listenToSong(song):
     else:
         cursor.execute('''
         UPDATE listen
-        SET count = count + 1
+        SET cnt = cnt + 1
         WHERE uid = :uid AND sno = :sno AND sid = :sid
         ''', {"uid": id, "sno": sno, "sid": song[1]})
     
