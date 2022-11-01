@@ -893,6 +893,20 @@ def insertSongIntoPlaylist(song, playlist):
 
     # Save to DB
     connection.commit() 
+    
+def addnewSong():
+    global window, connection
+    new = Frame(window)
+    new.pack()
+
+    new_song = tkinter.StringVar()
+
+    # label to tell the artist where to enter values of new song
+    Label(new, text="Please enter name and duration of song in seconds, seperated by a comma", font=('Arial',15)).grid(row=0, column=0)
+    # input box for the song details, must be name followed by suration
+    Entry(new, textvariable = new_song, font=('Arial',15)).grid(row=1, column=0)
+    Button(new,text="Add Song", font = ('Arial',15), command=lambda:[clearFrame(new), addSong(new_song)]).grid(row=2, column=0)
+    Button(new, text="Back", fg='red', bg='gray',command=lambda: [clearFrame(new), artistPage()], font=('Arial',15)).grid(row=6)
 
 ######
 # If not, the song should be added with a unique id (assigned by your system) and any additional artist who may have 
