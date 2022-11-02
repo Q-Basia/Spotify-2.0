@@ -129,14 +129,14 @@ def artistPage():
     global window 
         
     # create page
-    artistFrame = Frame(window)
+    artistFrame = Frame(window, bg='gray')
     artistFrame.pack()
     
     # buttons to add the song, find top users and top playlists, logout and exit the program
-    Button(artistFrame, text = "New song", font=('Arial',15), command=lambda: [clearFrame(artistFrame), addnewSong()]).grid(row=2, column=0, pady=(0,20))
-    Button(artistFrame, text = "Find Top 3's", font=('Arial',15), command=lambda: [clearFrame(artistFrame), findTop()]).grid(row=3, column=0)
-    Button(artistFrame, text = "Logout", font=('Arial',15), command=lambda: [clearFrame(artistFrame), reset(), home()]).grid(row=5, column=0, pady=(20,0))
-    Button(artistFrame, text = "EXIT", font=('Arial',15), command=lambda: [reset(), window.destroy()]).grid(row=6, column=0, pady=(20,0))
+    Button(artistFrame, bg='gray', text = "New song", font=('Arial',15), command=lambda: [clearFrame(artistFrame), addnewSong()]).grid(row=2, column=0, pady=(0,20))
+    Button(artistFrame, bg='gray', text = "Find Top 3's", font=('Arial',15), command=lambda: [clearFrame(artistFrame), findTop()]).grid(row=3, column=0)
+    Button(artistFrame, bg='gray', text = "Logout", font=('Arial',15), command=lambda: [clearFrame(artistFrame), reset(), home()]).grid(row=5, column=0, pady=(20,0))
+    Button(artistFrame, bg='gray', text = "EXIT", font=('Arial',15), command=lambda: [reset(), window.destroy()]).grid(row=6, column=0, pady=(20,0))
 
 # creates a page that contains all the actions a user can take on the app
 def userPage():
@@ -147,7 +147,7 @@ def userPage():
     
     #cursor.execute()
     #create page
-    userFrame = Frame(window, borderwidth=0)
+    userFrame = Frame(window, bg='gray', borderwidth=0)
     userFrame.pack()
     
     def startSession():
@@ -181,29 +181,29 @@ def userPage():
             connection.commit()
             
     # initiate error labels
-    alreadyL = Label(userFrame, text = "you are already in a listening session", font=('Arial',15), fg='red')
-    notListening = Label(userFrame, text="you are not currently in a listening session", font=('Arial',15), fg='red')
+    alreadyL = Label(userFrame, bg='gray', text = "you are already in a listening session", font=('Arial',15), fg='red')
+    notListening = Label(userFrame, bg='gray', text="you are not currently in a listening session", font=('Arial',15), fg='red')
         
     # button to start the session
     Button(userFrame, text = "start session", fg='white', bg='green', command=lambda: startSession(), font=('Arial',15)).grid(row=0, column=0)
     # message to indicate where to enter keywords and the button to search
-    Label(userFrame, text = "enter song/playlist", font=('Arial',15)).grid(row=2, column=0, pady=(20,0))
+    Label(userFrame, bg='gray', text = "enter song/playlist", font=('Arial',15)).grid(row=2, column=0, pady=(20,0))
      # We store the keywords in a string variable
-    Entry(userFrame, textvariable = musicKeywords).grid(row=3, column=0)
+    Entry(userFrame, textvariable = musicKeywords, font=('Arial',15)).grid(row=3, column=0)
     # Button to search songs/playlists with keywords
-    Button(userFrame, text = "search for songs or playlists", command=lambda:[clearFrame(userFrame), displaySongsPlaylist(searchSongsAndPlaylists(musicKeywords.get().split()),0)]).grid(row=4, column=0)
+    Button(userFrame, bg='gray', text = "search for songs or playlists", font=('Arial',15), command=lambda:[clearFrame(userFrame), displaySongsPlaylist(searchSongsAndPlaylists(musicKeywords.get().split()),0)]).grid(row=4, column=0)
     
     # message to enter keywords to search for artist
-    Label(userFrame, text = "enter artist name").grid(row=6, column=0, pady=(20,0))
+    Label(userFrame, bg='gray', text = "enter artist name", font=('Arial',15)).grid(row=6, column=0, pady=(20,0))
     # We store the keywords in a string variable
-    Entry(userFrame, textvariable = artistKeywords).grid(row=7, column=0)
+    Entry(userFrame, textvariable = artistKeywords, font=('Arial',15)).grid(row=7, column=0)
     # Button to search artists with the keywords
-    Button(userFrame, text = "search for artists", command=lambda:[clearFrame(userFrame), displayArtists(searchArtists(artistKeywords.get().split()),0)]).grid(row=8, column=0)
+    Button(userFrame, bg='gray', font=('Arial',15), text = "search for artists", command=lambda:[clearFrame(userFrame), displayArtists(searchArtists(artistKeywords.get().split()),0)]).grid(row=8, column=0)
     # button to end the session
     Button(userFrame, text = "end session", fg='white', bg='red', command=lambda: endSession(), font=('Arial',15)).grid(row=10, column=0, pady=(20,0))
     # button to logout
-    Button(userFrame, text = "logout", command=lambda: [endSession(), clearFrame(userFrame), home()], font=('Arial',15)).grid(row=11, column=0, pady=(20,0))
-    Button(userFrame, text = "EXIT", font=('Arial',15), command=lambda: [endSession(), reset(), window.destroy()]).grid(row=12, column=0, pady=(20,0))
+    Button(userFrame, bg='gray', text = "logout", command=lambda: [endSession(), clearFrame(userFrame), home()], font=('Arial',15)).grid(row=11, column=0, pady=(20,0))
+    Button(userFrame, bg='gray', text = "EXIT", font=('Arial',15), command=lambda: [endSession(), reset(), window.destroy()]).grid(row=12, column=0, pady=(20,0))
 
 def choose():
     global window
@@ -300,7 +300,7 @@ def home():
     Label(signinFrame, text = "ID",font=('Arial',15), bg='gray').pack(side = LEFT)#.grid(row=1, column=0)
     Entry(signinFrame, textvariable = new_id, font=('Arial',15), fg='green').pack(side = LEFT)#.grid(row=1, column=1)   
 
-    Button(signinBottom, text="exit", bg='gray', fg='red', command=lambda: window.destroy(), font=('Arial',15)).pack(side = BOTTOM)#.grid(row=6, column=0, pady=30)
+    Button(signinBottom, text="EXIT", bg='gray', fg='red', command=lambda: window.destroy(), font=('Arial',15)).pack(side = BOTTOM)#.grid(row=6, column=0, pady=30)
     Button(signinBottom, text = "register", command=lambda: [clearFrame(signinFrame), clearFrame(signinBottom), registerPage()], font=('Arial',15), bg='gray').pack(side = BOTTOM)#.grid(row=4, column=0)
     Button(signinBottom, text = "next", command=lambda: [setID(new_id), check()], fg='turquoise', bg='gray', font=('Arial',15)).pack(side = BOTTOM)#.grid(row=3, column=0)
     
@@ -462,34 +462,34 @@ def displaySongsPlaylist(musicArray, pageIndex):
     global window
 
     #create display page
-    displayFrame = Frame(window, borderwidth=0)
+    displayFrame = Frame(window, bg='gray', borderwidth=0)
     displayFrame.pack()
 
     # button to return to user page
-    Button(displayFrame, text = "Return", command=lambda: [clearFrame(displayFrame), userPage()]).grid(row=0, column=0, padx = 15)
+    Button(displayFrame, bg='gray', text = "Return", command=lambda: [clearFrame(displayFrame), userPage()]).grid(row=0, column=0, padx = 15)
 
     # Create the 5 slots for the 5 music
     if(0 <= pageIndex< size):
-        Button(displayFrame, text = musicTupleToString(musicArray[pageIndex]), command = lambda: determineContent(musicArray[pageIndex], displayFrame)).grid(row=1, column=1, pady = 4)
+        Button(displayFrame, bg='gray', text = musicTupleToString(musicArray[pageIndex]), command = lambda: determineContent(musicArray[pageIndex], displayFrame)).grid(row=1, column=1, pady = 4)
     if(0 <= pageIndex +1 < size):
-        Button(displayFrame, text = musicTupleToString(musicArray[pageIndex+1]), command = lambda: determineContent(musicArray[pageIndex+1], displayFrame)).grid(row=2, column=1, pady = 4)
+        Button(displayFrame, bg='gray', text = musicTupleToString(musicArray[pageIndex+1]), command = lambda: determineContent(musicArray[pageIndex+1], displayFrame)).grid(row=2, column=1, pady = 4)
     if(0 <= pageIndex +2 < size):
-        Button(displayFrame, text = musicTupleToString(musicArray[pageIndex+2]), command = lambda: determineContent(musicArray[pageIndex+2], displayFrame)).grid(row=3, column=1, pady = 4)
+        Button(displayFrame, bg='gray', text = musicTupleToString(musicArray[pageIndex+2]), command = lambda: determineContent(musicArray[pageIndex+2], displayFrame)).grid(row=3, column=1, pady = 4)
     if(0 <= pageIndex + 3 < size):
-        Button(displayFrame, text = musicTupleToString(musicArray[pageIndex+3]), command = lambda: determineContent(musicArray[pageIndex+3], displayFrame)).grid(row=4, column=1, pady = 4)
+        Button(displayFrame, bg='gray', text = musicTupleToString(musicArray[pageIndex+3]), command = lambda: determineContent(musicArray[pageIndex+3], displayFrame)).grid(row=4, column=1, pady = 4)
     if(0 <= pageIndex + 4 < size):
-        Button(displayFrame, text = musicTupleToString(musicArray[pageIndex+4]), command = lambda: determineContent(musicArray[pageIndex+4], displayFrame)).grid(row=5, column=1, pady = 4)
+        Button(displayFrame, bg='gray', text = musicTupleToString(musicArray[pageIndex+4]), command = lambda: determineContent(musicArray[pageIndex+4], displayFrame)).grid(row=5, column=1, pady = 4)
     
     # Scroll down button
     if(pageIndex + 5 < size):
-        Button(displayFrame, text = "Scroll Down", command=lambda: [clearFrame(displayFrame),displaySongsPlaylist(musicArray,pageIndex+5)]).grid(row=6, column=1, pady = 15)
+        Button(displayFrame, text = "Scroll Down", bg='gray', command=lambda: [clearFrame(displayFrame),displaySongsPlaylist(musicArray,pageIndex+5)]).grid(row=6, column=1, pady = 15)
     # Scroll up button
     if(pageIndex - 5 >= 0):
-        Button(displayFrame, text = "Scroll Up", command=lambda: [clearFrame(displayFrame),displaySongsPlaylist(musicArray,pageIndex-5)]).grid(row=0, column=1, pady = 15)
+        Button(displayFrame, text = "Scroll Up", bg='gray', command=lambda: [clearFrame(displayFrame),displaySongsPlaylist(musicArray,pageIndex-5)]).grid(row=0, column=1, pady = 15)
 
     # If size = 0, we indicate that no songs returned
     if(size == 0):
-        Label(displayFrame, text = "No songs or playlist having those keywords!").grid(row=1, column=1)
+        Label(displayFrame, font=('Arial', 15), text = "No songs or playlist having those keywords!", bg='gray', fg='red').grid(row=1, column=1)
 
 def musicTupleToString(tuple):
     # Takes the tuple of an array of songs/playlist and transform it into a complete string 
@@ -515,34 +515,34 @@ def displayArtists(artistArray, pageIndex):
     global window
 
     #create display page
-    displayFrame = Frame(window, borderwidth=0)
+    displayFrame = Frame(window, bg='gray', borderwidth=0)
     displayFrame.pack()
 
     # button to return to user page
-    Button(displayFrame, text = "Return", command=lambda: [clearFrame(displayFrame), userPage()]).grid(row=0, column=0, padx = 15)
+    Button(displayFrame, bg='gray', text = "Return", command=lambda: [clearFrame(displayFrame), userPage()]).grid(row=0, column=0, padx = 15)
 
     # Create the 5 slots for the 5 music
     if(0 <= pageIndex< size):
-        Button(displayFrame, text = artistTupleToString(artistArray[pageIndex]), command = lambda: determineContent(artistArray[pageIndex], displayFrame)).grid(row=1, column=1, pady = 4)
+        Button(displayFrame, bg='gray', text = artistTupleToString(artistArray[pageIndex]), command = lambda: determineContent(artistArray[pageIndex], displayFrame)).grid(row=1, column=1, pady = 4)
     if(0 <= pageIndex +1 < size):
-        Button(displayFrame, text = artistTupleToString(artistArray[pageIndex+1]), command = lambda: determineContent(artistArray[pageIndex+1], displayFrame)).grid(row=2, column=1, pady = 4)
+        Button(displayFrame, bg='gray', text = artistTupleToString(artistArray[pageIndex+1]), command = lambda: determineContent(artistArray[pageIndex+1], displayFrame)).grid(row=2, column=1, pady = 4)
     if(0 <= pageIndex +2 < size):
-        Button(displayFrame, text = artistTupleToString(artistArray[pageIndex+2]), command = lambda: determineContent(artistArray[pageIndex+2], displayFrame)).grid(row=3, column=1, pady = 4)
+        Button(displayFrame, bg='gray', text = artistTupleToString(artistArray[pageIndex+2]), command = lambda: determineContent(artistArray[pageIndex+2], displayFrame)).grid(row=3, column=1, pady = 4)
     if(0 <= pageIndex + 3 < size):
-        Button(displayFrame, text = artistTupleToString(artistArray[pageIndex+3]), command = lambda: determineContent(artistArray[pageIndex+3], displayFrame)).grid(row=4, column=1, pady = 4)
+        Button(displayFrame, bg='gray', text = artistTupleToString(artistArray[pageIndex+3]), command = lambda: determineContent(artistArray[pageIndex+3], displayFrame)).grid(row=4, column=1, pady = 4)
     if(0 <= pageIndex + 4 < size):
-        Button(displayFrame, text = artistTupleToString(artistArray[pageIndex+4]), command = lambda: determineContent(artistArray[pageIndex+4], displayFrame)).grid(row=5, column=1, pady = 4)
+        Button(displayFrame, bg='gray', text = artistTupleToString(artistArray[pageIndex+4]), command = lambda: determineContent(artistArray[pageIndex+4], displayFrame)).grid(row=5, column=1, pady = 4)
     
     # Scroll down button
     if(pageIndex + 5 < size):
-        Button(displayFrame, text = "Scroll Down", command=lambda: [clearFrame(displayFrame),displaySongsPlaylist(artistArray,pageIndex+5)]).grid(row=6, column=1, pady = 15)
+        Button(displayFrame, bg='gray', text = "Scroll Down", command=lambda: [clearFrame(displayFrame),displaySongsPlaylist(artistArray,pageIndex+5)]).grid(row=6, column=1, pady = 15)
     # Scroll up button
     if(pageIndex - 5 >= 0):
-        Button(displayFrame, text = "Scroll Up", command=lambda: [clearFrame(displayFrame),displaySongsPlaylist(artistArray,pageIndex-5)]).grid(row=0, column=1, pady = 15)
+        Button(displayFrame, bg='gray', text = "Scroll Up", command=lambda: [clearFrame(displayFrame),displaySongsPlaylist(artistArray,pageIndex-5)]).grid(row=0, column=1, pady = 15)
 
     # If size = 0, we indicate that no songs returned
     if(size == 0):
-        Label(displayFrame, text = "No songs or artists having those keywords!").grid(row=1, column=1)
+        Label(displayFrame, bg='gray', fg='red', text = "No songs or artists having those keywords!").grid(row=1, column=1)
 
 def artistTupleToString(tuple):
     # Takes the tuple of an array of artist and transform it into a complete string 
@@ -638,39 +638,39 @@ def displaySongs(songsArray, pageIndex, frame):
     global window
 
     #create display page
-    displayFrame = Frame(window, borderwidth=0)
+    displayFrame = Frame(window, bg='gray', borderwidth=0)
     displayFrame.pack()
 
     # button to return to user page
-    Button(displayFrame, text = "Return", command=lambda: [clearFrame(displayFrame), frame.pack()]).grid(row=0, column=0, padx = 15)
+    Button(displayFrame, bg='gray', text = "Return", command=lambda: [clearFrame(displayFrame), frame.pack()]).grid(row=0, column=0, padx = 15)
 
     # Create the 5 slots for the 5 songs
     if(0 <= pageIndex< size):
         song = songsArray[pageIndex]
-        Button(displayFrame, text = song[1] + " | " + song[2] + " | " + song[3], command = lambda: songMenu(song,displayFrame)).grid(row=1, column=1, pady = 4)
+        Button(displayFrame, bg='gray', text = song[1] + " | " + song[2] + " | " + song[3], command = lambda: songMenu(song,displayFrame)).grid(row=1, column=1, pady = 4)
     if(0 <= pageIndex +1 < size):
         song = songsArray[pageIndex+1]
-        Button(displayFrame, text = song[1] + " | " + song[2] + " | " + song[3], command = lambda: songMenu(song,displayFrame)).grid(row=2, column=1, pady = 4)
+        Button(displayFrame, bg='gray', text = song[1] + " | " + song[2] + " | " + song[3], command = lambda: songMenu(song,displayFrame)).grid(row=2, column=1, pady = 4)
     if(0 <= pageIndex +2 < size):
         song = songsArray[pageIndex+2]
-        Button(displayFrame, text = song[1] + " | " + song[2] + " | " + song[3], command = lambda: songMenu(song,displayFrame)).grid(row=3, column=1, pady = 4)
+        Button(displayFrame, bg='gray', text = song[1] + " | " + song[2] + " | " + song[3], command = lambda: songMenu(song,displayFrame)).grid(row=3, column=1, pady = 4)
     if(0 <= pageIndex + 3 < size):
         song = songsArray[pageIndex+3]
-        Button(displayFrame, text = song[1] + " | " + song[2] + " | " + song[3], command = lambda: songMenu(song,displayFrame)).grid(row=4, column=1, pady = 4)
+        Button(displayFrame, bg='gray', text = song[1] + " | " + song[2] + " | " + song[3], command = lambda: songMenu(song,displayFrame)).grid(row=4, column=1, pady = 4)
     if(0 <= pageIndex + 4 < size):
         song = songsArray[pageIndex+4]
-        Button(displayFrame, text = song[1] + " | " + song[2] + " | " + song[3], command = lambda: songMenu(song,displayFrame)).grid(row=5, column=1, pady = 4)
+        Button(displayFrame, bg='gray', text = song[1] + " | " + song[2] + " | " + song[3], command = lambda: songMenu(song,displayFrame)).grid(row=5, column=1, pady = 4)
     
     # Scroll down button
     if(pageIndex + 5 < size):
-        Button(displayFrame, text = "Scroll Down", command=lambda: [clearFrame(displayFrame),displaySongs(songsArray,pageIndex+5, frame)]).grid(row=6, column=1, pady = 15)
+        Button(displayFrame, bg='gray', text = "Scroll Down", command=lambda: [clearFrame(displayFrame),displaySongs(songsArray,pageIndex+5, frame)]).grid(row=6, column=1, pady = 15)
     # Scroll up button
     if(pageIndex - 5 >= 0):
-        Button(displayFrame, text = "Scroll Up", command=lambda: [clearFrame(displayFrame),displaySongs(songsArray,pageIndex-5, frame)]).grid(row=0, column=1, pady = 15)
+        Button(displayFrame, bg='gray', text = "Scroll Up", command=lambda: [clearFrame(displayFrame),displaySongs(songsArray,pageIndex-5, frame)]).grid(row=0, column=1, pady = 15)
 
     # If size = 0, we indicate that no songs returned
     if(size == 0):
-        Label(displayFrame, text = "No songs to display!").grid(row=1, column=1)
+        Label(displayFrame, bg='gray', fg='red', text = "No songs to display!").grid(row=1, column=1)
 
 def songMenu(song, frame):
     # We display the different options that we can with a song
@@ -685,14 +685,15 @@ def songMenu(song, frame):
     clearFrame(frame)
 
     #create menu page
-    MenuFrame = Frame(window, borderwidth=0)
+    MenuFrame = Frame(window, bg='gray', borderwidth=0)
     MenuFrame.pack()
+    listening = Label(MenuFrame, text ="listening to song", bg='gray', fg='blue', font=('Arial', 15))
     
-    Button(MenuFrame, text = "Return", command=lambda: [clearFrame(MenuFrame), frame.pack()]).grid(row=0, column=0, padx = 15)
+    Button(MenuFrame, font=('Arial',15), bg='gray', text = "Return", command=lambda: [clearFrame(MenuFrame), frame.pack()]).grid(row=0, column=0, padx = 15)
 
-    Button(MenuFrame, text = "Listen to the Song", command=lambda: [listenToSong(song)]).grid(row=0, column=1, pady = 15)
-    Button(MenuFrame, text = "More information about the Song", command=lambda: [clearFrame(MenuFrame), infoAboutSong(song,frame)]).grid(row=1, column=1, pady = 15)
-    Button(MenuFrame, text = "Add the Song to a playlist", command=lambda: [clearFrame(MenuFrame), addSongToPlaylist(song,frame)]).grid(row=2, column=1, pady = 15)
+    Button(MenuFrame, font=('Arial',15), bg='gray', text = "Listen to the Song", command=lambda: [listening.grid(row=3, column=1), listenToSong(song)]).grid(row=0, column=1, pady = 15)
+    Button(MenuFrame, font=('Arial',15), bg='gray', text = "More information about the Song", command=lambda: [clearFrame(MenuFrame), infoAboutSong(song,frame)]).grid(row=1, column=1, pady = 15)
+    Button(MenuFrame, font=('Arial',15), bg='gray', text = "Add the Song to a playlist", command=lambda: [clearFrame(MenuFrame), addSongToPlaylist(song,frame)]).grid(row=2, column=1, pady = 15)
 
 def listenToSong(song):
     # We store it in our database when a user listens to a song (what time, which song)
@@ -751,11 +752,11 @@ def infoAboutSong(song,frame):
     # Format of song: (Type, id, title, duration, number of keywords)
 
     #create menu page
-    infoFrame = Frame(window, borderwidth=0)
+    infoFrame = Frame(window, bg='gray', borderwidth=0)
     infoFrame.pack()
     
     # Return to the different options for the song
-    Button(infoFrame, text = "Return", command=lambda: [clearFrame(infoFrame), songMenu(song,frame)]).grid(row=0, column=0, padx = 15)
+    Button(infoFrame, bg='gray', text = "Return", command=lambda: [clearFrame(infoFrame), songMenu(song,frame)]).grid(row=0, column=0, padx = 15)
 
     # Get following info about the song: artists, id, title, duration, name of playlists it appears in
     
@@ -800,15 +801,15 @@ def infoAboutSong(song,frame):
     # Display information
 
     # Display artists
-    Label(infoFrame, text = artistString).grid(row=2, column=1)
+    Label(infoFrame, bg='gray', text = artistString, font=('Arial', 15)).grid(row=2, column=1)
 
     # Display id, title & duration
-    Label(infoFrame, text = "Id:\n" + str(song[1])).grid(row=3, column=1)
-    Label(infoFrame, text = "Title:\n" + song[2]).grid(row=4, column=1)
-    Label(infoFrame, text = "Duration:\n" + str(song[3]) + " seconds").grid(row=5, column=1)
+    Label(infoFrame, bg='gray', text = "Id:\n" + str(song[1]), font=('Arial', 15)).grid(row=3, column=1)
+    Label(infoFrame, bg='gray', font=('Arial', 15), text = "Title:\n" + song[2]).grid(row=4, column=1)
+    Label(infoFrame, bg='gray', font=('Arial', 15), text = "Duration:\n" + str(song[3]) + " seconds").grid(row=5, column=1)
 
     # Display playlists
-    Label(infoFrame, text = playlistString).grid(row=6, column=1)
+    Label(infoFrame, bg='gray', text = playlistString, font=('Arial', 15)).grid(row=6, column=1)
 
 def addSongToPlaylist(song,frame):
     # A user selects a song and adds it to a playlist of their choice
@@ -825,16 +826,67 @@ def addSongToPlaylist(song,frame):
     global connection
 
     #create menu page
-    addFrame = Frame(window, borderwidth=0)
+    addFrame = Frame(window, bg='gray', borderwidth=0)
     addFrame.pack()
 
     # Variable to store new playlist name
     playlistName = tkinter.StringVar()
 
     # Return to the different options for the song
-    Button(addFrame, text = "Return", command=lambda: [clearFrame(addFrame), songMenu(song,frame)]).grid(row=0, column=0, padx = 15)
+    Button(addFrame, font=('Arial',15), bg='gray', text = "Return", command=lambda: [clearFrame(addFrame), songMenu(song,frame)]).grid(row=0, column=0, padx = 15)
+    
+    notAcc = Label(addFrame, bg='gray', text = "Not an accepted name for the new playlist", font=('Arial', 15), fg='red')
+    added = Label(addFrame, font=('Arial', 15), text="Song was added to playlist", bg='gray', fg='blue')
+    already = Label(addFrame, text="Already in playlist", bg='gray', fg='red', font=('Arial', 15))
+    
+    def insertSongIntoNewPlaylist():
+        # to insert a song into a new playlist
 
+        name = playlistName.get()
+        # If an empty string, we don't consider it as an acceptable name
+        if(name == ""):
+            already.grid_remove()
+            added.grid_remove()
+            notAcc.grid(row= 3 +buttonIndex, column=1)
+        else:
+            # Get maximum pid
+            cursor.execute("SELECT MAX(p.pid) FROM playlists p")
+            maxPid = cursor.fetchone()[0]+1
+            # Insert in two necessary tables
+            cursor.execute("INSERT INTO playlists VALUES (:pid, :title, :uid) ", {"pid": maxPid, "title": name, "uid": id})
+            cursor.execute("INSERT INTO plinclude VALUES (:pid, :sid, 1)", {"pid": maxPid, "sid": song[1]})
+            already.grid_remove()
+            notAcc.grid_remove()
+            added.grid(row=3+buttonIndex, column=1) 
+                
+            connection.commit()
+    
+    def insertSongIntoPlaylist(song, playlist):
+        # We add a song into an already existing playlist
+    # Arguments:
+        # song: song tuple that we want to add to a playlist
+        # playlist: playlist id to whom we want to add a song
 
+        global cursor
+        global connection
+
+        # Get next "sorder" of playlist
+        cursor.execute("SELECT MAX(pl.sorder), p.title FROM plinclude pl, playlists p WHERE pl.pid = :pid AND p.pid = :pid;", {"pid": playlist})
+        order = cursor.fetchone()[0] + 1
+
+        # Verify that this song was not inserted before
+        cursor.execute("SELECT pl.sid FROM plinclude pl WHERE pl.pid = :pid AND pl.sid = :sid", {"pid": playlist, "sid": song[1]})
+        if(cursor.fetchone() == None):
+            cursor.execute("INSERT INTO plinclude VALUES (:pid, :sid, :sorder)", {"pid": playlist, "sid": song[1], "sorder": order})
+            notAcc.grid_remove()
+            already.grid_remove()
+            added.grid(row=3+buttonIndex, column=1)
+        else:
+            notAcc.grid_remove()
+            added.grid_remove()
+            already.grid(row=3+buttonIndex, column=1)
+        # Save to DB
+        connection.commit() 
     # Can choose to add to own playlist
     buttonIndex = 0 # keep count of all buttons
     # Find user's playlists
@@ -849,70 +901,35 @@ def addSongToPlaylist(song,frame):
 
     # We verify that there is at least one playlist assigned to the user, then create a button for each playlist
     if(playlistRows[0][0] != None):
-        Label(addFrame, text = "Add to existing playlist:").grid(row=0, column=1)
+        Label(addFrame, bg='gray', font=('Arial',15), text = "Add to existing playlist:").grid(row=0, column=1)
         for pRow in playlistRows:
-            print(pRow[0])
-            Button(addFrame, text = pRow[1], command = lambda pRow = pRow: [insertSongIntoPlaylist(song, pRow[0])] ).grid(row=1+buttonIndex, column =1)
+            #print(pRow[0])
+            Button(addFrame, font=('Arial',15), bg='gray', text = pRow[1], command = lambda pRow = pRow: [insertSongIntoPlaylist(song, pRow[0])] ).grid(row=1+buttonIndex, column =1)
             buttonIndex += 1
 
     # Let user create new playlist if they want
     
-    Label(addFrame, text = "Add to new playlist:").grid(row=1 +buttonIndex, column=1) #prompt
-    Entry(addFrame, textvariable = playlistName).grid(row= 2 +buttonIndex, column=1)
-    Button(addFrame, text = "Add", command = lambda: [insertSongIntoNewPlaylist()]).grid(row= 2 +buttonIndex, column=2)
-
-    def insertSongIntoNewPlaylist():
-        # to insert a song into a new playlist
-
-        name = playlistName.get()
-        # If an empty string, we don't consider it as an acceptable name
-        if(name == ""): Label(addFrame, text = "Not an accepted name for the new playlist", fg='red').grid(row= 3 +buttonIndex, column=1)
-        else:
-            # Get maximum pid
-            cursor.execute("SELECT MAX(p.pid) FROM playlists p")
-            maxPid = cursor.fetchone()[0]+1
-            # Insert in two necessary tables
-            cursor.execute("INSERT INTO playlists VALUES (:pid, :title, :uid) ", {"pid": maxPid, "title": name, "uid": id})
-            cursor.execute("INSERT INTO plinclude VALUES (:pid, :sid, 1)", {"pid": maxPid, "sid": song[1]})
-            
-            connection.commit()
+    Label(addFrame, font=('Arial',15), bg='gray', text = "Add to new playlist:").grid(row=1 +buttonIndex, column=1) #prompt
+    Entry(addFrame, font=('Arial',15), bg='gray', textvariable = playlistName).grid(row= 2 +buttonIndex, column=1)
+    Button(addFrame, font=('Arial',15), bg='gray', text = "Add", command = lambda: [insertSongIntoNewPlaylist()]).grid(row= 2 +buttonIndex, column=2)
+        
 
 
-def insertSongIntoPlaylist(song, playlist):
-    # We add a song into an already existing playlist
-    # Arguments:
-        # song: song tuple that we want to add to a playlist
-        # playlist: playlist id to whom we want to add a song
 
-    global cursor
-    global connection
 
-    # Get next "sorder" of playlist
-    cursor.execute("SELECT MAX(pl.sorder) FROM plinclude pl WHERE pl.pid = :pid", {"pid": playlist})
-    order = cursor.fetchone()[0] + 1
-
-    # Verify that this song was not inserted before
-    cursor.execute("SELECT pl.sid FROM plinclude pl WHERE pl.pid = :pid AND pl.sid = :sid", {"pid": playlist, "sid": song[1]})
-    if(cursor.fetchone() == None):
-        cursor.execute("INSERT INTO plinclude VALUES (:pid, :sid, :sorder)", {"pid": playlist, "sid": song[1], "sorder": order})
-    else:
-        print("Already in playlist!")
-
-    # Save to DB
-    connection.commit() 
 
 def addnewSong():
     global window, connection
-    new = Frame(window)
+    new = Frame(window, bg='gray')
     new.pack()
 
     new_song = tkinter.StringVar()
 
     # label to tell the artist where to enter values of new song
-    Label(new, text="Please enter name and duration of song in seconds, seperated by a comma", font=('Arial',15)).grid(row=0, column=0)
+    Label(new, bg='gray', text="Please enter name and duration of song in seconds, seperated by a comma", font=('Arial',15)).grid(row=0, column=0)
     # input box for the song details, must be name followed by suration
     Entry(new, textvariable = new_song, font=('Arial',15)).grid(row=1, column=0)
-    Button(new,text="Add Song", font = ('Arial',15), command=lambda:[clearFrame(new), addSong(new_song)]).grid(row=2, column=0)
+    Button(new, bg='gray', text="Add Song", font = ('Arial',15), command=lambda:[clearFrame(new), addSong(new_song)]).grid(row=2, column=0)
     Button(new, text="Back", fg='red', bg='gray',command=lambda: [clearFrame(new), artistPage()], font=('Arial',15)).grid(row=6)
 
 ######
@@ -937,17 +954,17 @@ def addSong(new_song):
         connection.commit()
     
         #create the page
-        er = Frame(window)
+        er = Frame(window, bg='gray')
         er.pack()
 
 
         # message to enter keywords to search for artist
-        Label(er, text = "Enter the artists that performed the song", font=('Arial',15)).grid(row=2, column=0, pady=(20,0))
+        Label(er, bg='gray', text = "Enter the artists that performed the song", font=('Arial',15)).grid(row=2, column=0, pady=(20,0))
 
         performers = tkinter.StringVar()
         # We store the keywords in a string variable
         Entry(er, textvariable = performers, font=('Arial',15)).grid(row=3, column=0)
-        Button(er, text="Add Artist(s)", command=lambda: [clearFrame(er), addArtistPerform(performers, s_id)]).grid(row = 4, column = 0)        
+        Button(er, bg='gray', font=('Arial', 15), text="Add Artist(s)", command=lambda: [clearFrame(er), addArtistPerform(performers, s_id)]).grid(row = 4, column = 0)        
     else:
         songExist()
 
@@ -970,37 +987,37 @@ def addArtistPerform(performs, s_id):
             cursor.execute(f"INSERT INTO perform VALUES (?, ?);", values)
             connection.commit()
 
-    connPerformer = Frame(window)
+    connPerformer = Frame(window, bg='gray')
     connPerformer.pack()
 
     # create a label to display the message
-    Label(connPerformer, text = "Song has been added", fg ='green', font=('Arial',15)).grid(row = 0, column = 0)
+    Label(connPerformer, text = "Song has been added", bg='gray', fg ='green', font=('Arial',15)).grid(row = 0, column = 0)
 
     # create a button to return to the home page
-    Button(connPerformer, text="Return", command=lambda: [clearFrame(connPerformer), artistPage()]).grid(row = 1, column= 0)
+    Button(connPerformer, bg='gray', text="Return", font=('Arial', 15), command=lambda: [clearFrame(connPerformer), artistPage()]).grid(row = 1, column= 0)
 
 def songExist():
     global window
     
     #create the page
-    er = Frame(window)
+    er = Frame(window, bg='gray')
     er.pack()
     
     # create a label to display the message
-    Label(er, font=('Arial',15), text = "Song already exists", fg ='red').grid(row = 0, column = 0)
+    Label(er, bg='gray', font=('Arial',15), text = "Song already exists", fg ='red').grid(row = 0, column = 0)
     
     # create a button to return to the home page
-    Button(er, text="return", font=('Arial',15), command=lambda: [clearFrame(er), artistPage()]).grid(row = 1, column= 0)
+    Button(er, bg='gray', text="return", font=('Arial',15), command=lambda: [clearFrame(er), artistPage()]).grid(row = 1, column= 0)
 
 
 def findTop():
     global window, connection
-    new = Frame(window)
+    new = Frame(window, bg='gray')
     new.pack()
     
-    Button(new,text="Top Users", font = ('Arial',15), command=lambda:[clearFrame(new), displayTopusers()]).grid(row=0, column=0)
+    Button(new, bg='gray', text="Top Users", font = ('Arial',15), command=lambda:[clearFrame(new), displayTopusers()]).grid(row=0, column=0)
 
-    Button(new,text="Top Playlists", font = ('Arial',15), command=lambda:[clearFrame(new), displayTopplaylists()]).grid(row=1, column=0)
+    Button(new, bg='gray', text="Top Playlists", font = ('Arial',15), command=lambda:[clearFrame(new), displayTopplaylists()]).grid(row=1, column=0)
 
     Button(new, text="Back", fg='red', bg='gray',command=lambda: [clearFrame(new), artistPage()], font=('Arial',15)).grid(row=6)
 
@@ -1022,13 +1039,13 @@ def displayTopusers():
 
 
     #create display page
-    displayFrame = Frame(window, borderwidth=0)
+    displayFrame = Frame(window, bg='gray', borderwidth=0)
     displayFrame.pack()
 
     for i in range(0, len(username)):
-        Label(displayFrame, text=username[i][0], font=('Arial',15)).grid(row=i, column=0)
+        Label(displayFrame, bg='gray', text=username[i][0], font=('Arial',15)).grid(row=i, column=0)
 
-    Button(displayFrame, text = "Return", command=lambda: [clearFrame(displayFrame), artistPage()]).grid(row=5, column=0, padx = 15)
+    Button(displayFrame, bg='gray', text = "Return", font = ('Arial', 15), command=lambda: [clearFrame(displayFrame), artistPage()]).grid(row=5, column=0, padx = 15)
 
     
 #top 3 playlists that include the largest number of their songs
@@ -1051,15 +1068,15 @@ def displayTopplaylists():
 
 
     #create display page
-    displayFrame = Frame(window, borderwidth=0)
+    displayFrame = Frame(window, bg='gray', borderwidth=0)
     displayFrame.pack()
 
     for i in range(0, len(playlistname)):
-        Label(displayFrame, text=playlistname[i][0], font=('Arial',15)).grid(row=i, column=0)
-        Label(displayFrame, text=playlistname[i][1], font=('Arial',15)).grid(row=i, column=1)
+        Label(displayFrame, bg='gray', text=playlistname[i][0], font=('Arial',15)).grid(row=i+1, column=0)
+        Label(displayFrame, bg='gray', text=playlistname[i][1], font=('Arial',15)).grid(row=i+1, column=1)
         # Label(displayFrame, text=playlistname[i][2], font=('Arial',15)).grid(row=i, column=2)
 
-    Button(displayFrame, text = "Return", command=lambda: [clearFrame(displayFrame), artistPage()]).grid(row=5, column=0, padx = 15)
+    Button(displayFrame, bg='gray', text = "Return", font=('Arial', 15),  command=lambda: [clearFrame(displayFrame), artistPage()]).grid(row=5, column=0, padx = 15)
     
 
 def main():
