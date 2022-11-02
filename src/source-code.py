@@ -215,16 +215,23 @@ def choose():
     Button(chooseF, text="back", fg='red', bg='gray',command=lambda: [clearFrame(chooseF), home()], font=('Arial',15)).grid(row=6)
     
 def Validate(u):
-    global window, id, ps
-    passP = Frame(window)
+    global window, id, ps, name
+    if u=="artist":
+        cursor.execute(f'''SELECT name FROM artists WHERE aid = '{id}';''' )
+        name = ((cursor.fetchone())[0])
+    else:
+        cursor.execute(f'''SELECT name FROM users WHERE uid = '{id}';''' )
+        name = ((cursor.fetchone())[0])
+    
+    passP = Frame(window, bg='gray')
     passP.pack()
     new_ps = tkinter.StringVar()
-    Label(passP, text="enter your password below", font=('Arial',15)).grid(row=1, columnspan=3)
-    wP = Label(passP, text="Password is incorrect, please try again", fg='red')
-    Label(passP, text = "password", font=('Arial',15)).grid(row=2, column=0)
+    Label(passP, text="Welcome back "+name+", enter your password below", bg='gray', font=('Arial',15)).grid(row=1, columnspan=3)
+    wP = Label(passP, text="Password is incorrect, please try again", bg='gray', fg='red', font=('Arial', 15))
+    Label(passP, text = "password", bg='gray', font=('Arial',15)).grid(row=2, column=0)
     Entry(passP, textvariable=new_ps, show="*", font=('Arial',15)).grid(row=2, column=1)
-    Button(passP, text="login", command=lambda:[setPs(new_ps), test()], font=('Arial',15)).grid(row=3, column=0)
-    Button(passP, text="back", command=lambda: [clearFrame(passP), choose()], font=('Arial',15)).grid(row=4, column=0)
+    Button(passP, text="login", bg='gray', command=lambda:[setPs(new_ps), test()], font=('Arial',15)).grid(row=3, columnspan=2)
+    Button(passP, text="back", fg='red', bg='gray', command=lambda: [clearFrame(passP), home()], font=('Arial',15)).grid(row=4, columnspan=2)
     def test():
         if u == "artist":
             cursor.execute('''SELECT 'True'
@@ -232,7 +239,7 @@ def Validate(u):
                         WHERE aid = ? AND pwd = ?;''', (id, ps),)
             val = cursor.fetchone()
             if not val:
-                wP.grid(row =0, column = 0)
+                wP.grid(row =0, columnspan=3)
             else :
                 clearFrame(passP)
                 artistPage()
