@@ -1078,31 +1078,30 @@ def addnewSong():
     # creates a new variables new_song
     new_song = tkinter.StringVar()
 
-    # label to tell the artist where and how to enter values of new song as well as if they did ot type the format in properly
+    # label to tell the artist where and how to enter values of new song as well as if they did not enter the right format
     Label(new, bg='gray', text="Please enter name and duration of song in seconds, seperated by a comma", font=('Arial',15)).grid(row=1, column=0)
-    wF = Label(new, bg='gray', text="Wrong format", font=('Arial', 15))
+    wF = Label(new, bg='gray', fg='red', text="Wrong format", font=('Arial', 15))
+    wF2 = Label(new, bg='gray', fg='red', text="Duration is should be an integer", font=('Arial', 15))
 
     # input box for the song details, must be name followed by duration
     Entry(new, textvariable = new_song, font=('Arial',15)).grid(row=2, column=0)
 
     # Buttons to add Song and to return back to the artist page
-    Button(new, bg='gray', text="Add Song", font = ('Arial',15), command=lambda:[clearFrame(new), addSong(new_song)]).grid(row=3, column=0)
+    Button(new, bg='gray', text="Add Song", font = ('Arial',15), command=lambda:[checkformat()]).grid(row=3, column=0)
     Button(new, text="Back", fg='red', bg='gray',command=lambda: [clearFrame(new), artistPage()], font=('Arial',15)).grid(row=6)
 
     # This is to check if the user typed the new song in the right format
+    def checkformat():
 
-    # def check():
-    #     song = new_song.get().split(",")
-        
-    #     name = song[0]
-    #     dur = song[1]
-    #     if name=="" & dur==int(""):
-    #         clearFrame(new)
-    #         addSong(new_song)
-    #     else:
-    #         wF.grid(row =0, column = 0)
-    #         clearFrame(new)
-    #         addnewSong() 
+        if(("," in new_song.get()) == False):
+            wF.grid(row=0, column=0)
+        else: 
+            song = new_song.get().split(",")
+            if song[1].isdigit():
+                clearFrame(new)
+                addSong(new_song)
+            else:
+                wF2.grid(row=0, column=0)
 
 
 
@@ -1112,7 +1111,7 @@ def addSong(new_song):
     # Arguments:
     #   new_song: string input of song title and duration of song given from the user
     
-    global window, connection
+    global window, connection, id
 
     # To split the user input by the comma into name and duration
     
@@ -1120,15 +1119,21 @@ def addSong(new_song):
     name = song[0]
     dur = song[1]
 
-    cursor.execute(f"SELECT title FROM songs WHERE title = '{name}' AND duration = '{dur}';")
+    cursor.execute("SELECT s.title FROM songs s, perform p WHERE s.title = ? AND s.duration = ? AND p.sid = s.sid AND p.aid = ? ;", (name, dur, id))
     row = cursor.fetchone()
     
     if not row:
         cursor.execute("SELECT max(sid) FROM songs;")
         s_idrow = cursor.fetchone()
         s_id = s_idrow[0] + 1
-        values = [s_id, name, dur]
-        cursor.execute("INSERT INTO songs VALUES (?, ?, ?);", values)
+
+        # This is to register the signed in artists as one of the artist(s) that performed the song
+        first_value = [id, s_id]
+        cursor.execute("INSERT INTO perform VALUES (?, ?);", first_value)
+        connection.commit()
+
+        songvalues = [s_id, name, dur]
+        cursor.execute("INSERT INTO songs VALUES (?, ?, ?);", songvalues)
         connection.commit()
     
         #create the page
@@ -1137,47 +1142,56 @@ def addSong(new_song):
 
 
         # message to enter keywords to search for artist
-        Label(er, bg='gray', text = "Enter the artists that performed the song", font=('Arial',15)).grid(row=2, column=0, pady=(20,0))
-
+        Label(er, bg='gray', text = "Enter the id of any other artists that performed the song. Separate each id by a comma", font=('Arial',15)).grid(row=2, column=0, pady=(20,0))
+        # error message to th artist when the ID enterred is not valid
+        wA = Label(er, bg='gray', fg='red', text="Artist ID does not exist", font=('Arial', 15))
         # We store the artist(s) name(s) in a string variable
         performers = tkinter.StringVar()
-        
+        # # creating the entry for where the artist will enter other performers and the add artists button
+        # wF = Label(er, bg='gray', fg='red', text="Wrong format", font=('Arial', 15))
         Entry(er, textvariable = performers, font=('Arial',15)).grid(row=3, column=0)
-        Button(er, bg='gray', font=('Arial', 15), text="Add Artist(s)", command=lambda: [clearFrame(er), addArtistPerform(performers, s_id)]).grid(row = 4, column = 0)        
+        Button(er, bg='gray', font=('Arial', 15), text="Add Artist(s)", command=lambda: [checkartist()]).grid(row = 4, column = 0)
+
+        # # This is to check if the artists entered exists in the database
+        def checkartist():
+
+            artists = performers.get().split(",")
+            for artist in artists:
+                aid = artist.strip()
+                cursor.execute("SELECT a.aid FROM artists a WHERE a.aid = ?", (aid,))
+                ex = cursor.fetchone()
+                if ex == None:
+                    wA.grid(row=0, column=0)
+                    return
+                else:
+                    clearFrame(er)
+                    addArtistPerform(aid, s_id)
+            
+            connPerformer = Frame(window, bg='gray')
+            connPerformer.pack()
+            # create a label to display the message
+            Label(connPerformer, text = "Song has been added", bg='gray', fg ='green', font=('Arial',15)).grid(row = 0, column = 0)
+            # create a button to return to the artist page
+            Button(connPerformer, bg='gray', text="Return", font=('Arial', 15), command=lambda: [clearFrame(connPerformer), artistPage()]).grid(row = 1, column= 0)
+
     else:
         songExist()
 
 
 def addArtistPerform(performs, s_id):
     global window, connection, cursor, id
-
-    # This is to register the signed in artists as one of the artist(s) that performed the song
-    first_value = [id, s_id]
-    cursor.execute("INSERT INTO perform VALUES (?, ?);", first_value)
-    connection.commit()
     
-    # get the performers names from the user input by splitting
-    performers = performs.get().split(",")
-    
-    for artist in performers:
-        values = [artist, s_id]
+   
+    values = [performs.strip(), s_id]
 
         # If there are no other artists that performed the song, add the song and the artists that is signed in to the database
         # If not, it also adds the artists given by the artists signed in
-        if (artist == ""):
-            Pass
-        else:
-            cursor.execute(f"INSERT INTO perform VALUES (?, ?);", values)
-            connection.commit()
+    if (performs == ""):
+        Pass
+    else:
+        cursor.execute(f"INSERT INTO perform VALUES (?, ?);", values)
+        connection.commit()
 
-    connPerformer = Frame(window, bg='gray')
-    connPerformer.pack()
-
-    # create a label to display the message
-    Label(connPerformer, text = "Song has been added", bg='gray', fg ='green', font=('Arial',15)).grid(row = 0, column = 0)
-
-    # create a button to return to the artist page
-    Button(connPerformer, bg='gray', text="Return", font=('Arial', 15), command=lambda: [clearFrame(connPerformer), artistPage()]).grid(row = 1, column= 0)
 
 def songExist():
     # Function:
