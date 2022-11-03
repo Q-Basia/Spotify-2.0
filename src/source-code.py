@@ -938,9 +938,9 @@ def infoAboutSong(song,frame):
     ''', {"num":song[1]})
 
     playlistRows = cursor.fetchall()
-
     playlistString = ""
-    if(cursor.rowcount == 0): playlistString = "No Playlists"
+    if playlistRows[0][0] == None: 
+        playlistString = "No Playlists"
     else:
         playlistString += "Playlists:\n"
         for row in playlistRows:
@@ -1120,7 +1120,7 @@ def addSong(new_song):
     name = song[0]
     dur = song[1]
 
-    cursor.execute(f"SELECT title FROM songs WHERE title = '{name}' AND duration = '{dur}';")
+    cursor.execute(f"SELECT title FROM songs WHERE title = ? AND duration = ?;", (name, dur))
     row = cursor.fetchone()
     
     if not row:
