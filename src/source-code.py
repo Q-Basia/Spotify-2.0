@@ -30,6 +30,8 @@ def connect(path):
 
     connection = sqlite3.connect(path)
     cursor = connection.cursor()
+    # This is to delete any entry we want
+    # cursor.execute('''Delete From songs where sid>53''')
     return      
     
 # this function removes all widgets that were created for the specified page
@@ -912,36 +914,65 @@ def addSongToPlaylist(song,frame):
     Label(addFrame, font=('Arial',15), bg='gray', text = "Add to new playlist:").grid(row=1 +buttonIndex, column=1) #prompt
     Entry(addFrame, font=('Arial',15), bg='gray', textvariable = playlistName).grid(row= 2 +buttonIndex, column=1)
     Button(addFrame, font=('Arial',15), bg='gray', text = "Add", command = lambda: [insertSongIntoNewPlaylist()]).grid(row= 2 +buttonIndex, column=2)
-        
-
-
-
 
 
 def addnewSong():
+    # Function:
+    #   Creates a new frame and prompt user to enter a new song
+    # Arguments:
+    #   None
+
     global window, connection
+     
+    # Creates a new frame 
     new = Frame(window, bg='gray')
     new.pack()
 
+    # creates a new variables new_song
     new_song = tkinter.StringVar()
 
-    # label to tell the artist where to enter values of new song
-    Label(new, bg='gray', text="Please enter name and duration of song in seconds, seperated by a comma", font=('Arial',15)).grid(row=0, column=0)
-    # input box for the song details, must be name followed by suration
-    Entry(new, textvariable = new_song, font=('Arial',15)).grid(row=1, column=0)
-    Button(new, bg='gray', text="Add Song", font = ('Arial',15), command=lambda:[clearFrame(new), addSong(new_song)]).grid(row=2, column=0)
+    # label to tell the artist where and how to enter values of new song as well as if they did ot type the format in properly
+    Label(new, bg='gray', text="Please enter name and duration of song in seconds, seperated by a comma", font=('Arial',15)).grid(row=1, column=0)
+    wF = Label(new, bg='gray', text="Wrong format", font=('Arial', 15))
+
+    # input box for the song details, must be name followed by duration
+    Entry(new, textvariable = new_song, font=('Arial',15)).grid(row=2, column=0)
+
+    # Buttons to add Song and to return back to the artist page
+    Button(new, bg='gray', text="Add Song", font = ('Arial',15), command=lambda:[clearFrame(new), addSong(new_song)]).grid(row=3, column=0)
     Button(new, text="Back", fg='red', bg='gray',command=lambda: [clearFrame(new), artistPage()], font=('Arial',15)).grid(row=6)
 
-######
-# If not, the song should be added with a unique id (assigned by your system) and any additional artist who may have 
-# performed the song with their ids obtained from input
-def addSong(new_song):
-    global window
-    global connection
+    # This is to check if the user typed the new song in the right format
 
+    # def check():
+    #     song = new_song.get().split(",")
+        
+    #     name = song[0]
+    #     dur = song[1]
+    #     if name=="" & dur==int(""):
+    #         clearFrame(new)
+    #         addSong(new_song)
+    #     else:
+    #         wF.grid(row =0, column = 0)
+    #         clearFrame(new)
+    #         addnewSong() 
+
+
+
+def addSong(new_song):
+    # Function:
+    #   This function adds a new song to the database
+    # Arguments:
+    #   new_song: string input of song title and duration of song given from the user
+    
+    global window, connection
+
+    # To split the user input by the comma into name and duration
+    
     song = new_song.get().split(",")
     name = song[0]
     dur = song[1]
+
     cursor.execute(f"SELECT title FROM songs WHERE title = '{name}' AND duration = '{dur}';")
     row = cursor.fetchone()
     
@@ -961,8 +992,9 @@ def addSong(new_song):
         # message to enter keywords to search for artist
         Label(er, bg='gray', text = "Enter the artists that performed the song", font=('Arial',15)).grid(row=2, column=0, pady=(20,0))
 
+        # We store the artist(s) name(s) in a string variable
         performers = tkinter.StringVar()
-        # We store the keywords in a string variable
+        
         Entry(er, textvariable = performers, font=('Arial',15)).grid(row=3, column=0)
         Button(er, bg='gray', font=('Arial', 15), text="Add Artist(s)", command=lambda: [clearFrame(er), addArtistPerform(performers, s_id)]).grid(row = 4, column = 0)        
     else:
@@ -972,15 +1004,19 @@ def addSong(new_song):
 def addArtistPerform(performs, s_id):
     global window, connection, cursor, id
 
+    # This is to register the signed in artists as one of the artist(s) that performed the song
     first_value = [id, s_id]
     cursor.execute("INSERT INTO perform VALUES (?, ?);", first_value)
     connection.commit()
-
+    
+    # get the performers names from the user input by splitting
     performers = performs.get().split(",")
     
     for artist in performers:
         values = [artist, s_id]
 
+        # If there are no other artists that performed the song, add the song and the artists that is signed in to the database
+        # If not, it also adds the artists given by the artists signed in
         if (artist == ""):
             Pass
         else:
@@ -993,10 +1029,16 @@ def addArtistPerform(performs, s_id):
     # create a label to display the message
     Label(connPerformer, text = "Song has been added", bg='gray', fg ='green', font=('Arial',15)).grid(row = 0, column = 0)
 
-    # create a button to return to the home page
+    # create a button to return to the artist page
     Button(connPerformer, bg='gray', text="Return", font=('Arial', 15), command=lambda: [clearFrame(connPerformer), artistPage()]).grid(row = 1, column= 0)
 
 def songExist():
+    # Function:
+    #   This function is called when the song that the artists is trying to add already exists. 
+    #   So the song should not be added in this case and the artists should be told that the song is already in the database
+    # Arguments:
+    #   None
+    
     global window
     
     #create the page
@@ -1011,23 +1053,32 @@ def songExist():
 
 
 def findTop():
+    # Function:
+    #   This function is to create a new window to display the top 3 users and playlists,
+    #   displaying them from most listens to least listen
+    # Arguments:
+    #   None
+
     global window, connection
+    
+    #create display page
     new = Frame(window, bg='gray')
     new.pack()
     
+    # These buttons are to View top users, top playlists and to go back to the artist page respectively
     Button(new, bg='gray', text="Top Users", font = ('Arial',15), command=lambda:[clearFrame(new), displayTopusers()]).grid(row=0, column=0)
-
     Button(new, bg='gray', text="Top Playlists", font = ('Arial',15), command=lambda:[clearFrame(new), displayTopplaylists()]).grid(row=1, column=0)
-
     Button(new, text="Back", fg='red', bg='gray',command=lambda: [clearFrame(new), artistPage()], font=('Arial',15)).grid(row=6)
 
-
-    # The artist should be able to list top 3 users who listen to their songs the longest time
 def displayTopusers():
+    # Function:
+    #   This function display the top 3 users that listen to the signed in artist
+    # Arguments:
+    #   None
+
     global connection, cursor, id, window
 
-    # cursor.execute(f"SELECT s.sid FROM songs s, perform p, artists a WHERE p.aid=a.aid AND p.sid=s.sid AND a.aid = '{id}' GROUP BY s.sid;")
-    # s_idrow = cursor.fetchall()
+    # This query is to find the top 3 users and fetches them
     cursor.execute(f''' SELECT u.name FROM users u, listen l, songs s 
                         WHERE u.uid=l.uid AND l.sid IN (SELECT s1.sid 
                                                         FROM songs s1, perform p, artists a 
@@ -1035,47 +1086,48 @@ def displayTopusers():
                         GROUP BY u.name ORDER BY SUM(l.cnt*s.duration) DESC LIMIT 3;''')
     username = cursor.fetchall()
 
-    # cursor.execute("SELECT distinct u.name FROM users u, listen l, song s, perform p WHERE ")
-
-
-    #create display page
+    # Create display page
     displayFrame = Frame(window, bg='gray', borderwidth=0)
     displayFrame.pack()
 
+    # Displays the top users
     for i in range(0, len(username)):
         Label(displayFrame, bg='gray', text=username[i][0], font=('Arial',15)).grid(row=i, column=0)
 
+    # This button is to return back to the artist page
     Button(displayFrame, bg='gray', text = "Return", font = ('Arial', 15), command=lambda: [clearFrame(displayFrame), artistPage()]).grid(row=5, column=0, padx = 15)
 
     
-#top 3 playlists that include the largest number of their songs
 def displayTopplaylists():
+    # Function:
+    #   This function displays the top 3 playlists in which the songs performed by the signed in artists are located, 
+    #   diplaying them from most songs within the playlist to least.
+    # Arguments:
+    #   None
+
     global connection, cursor, id
-
+    
+    # This query is to find the top 3 playlists and fetches them
     cursor.execute(f''' SELECT p.title, count(pl.sid) 
-                        FROM playlists p, plinclude pl, songs s, artists a, perform pe
-                        WHERE pe.sid=pl.sid AND pe.aid=a.aid AND pl.pid=p.pid AND pl.sid IN (SELECT s1.sid 
-                                                                                             FROM songs s1, perform p, artists a 
-                                                                                             WHERE p.aid=a.aid AND p.sid=s1.sid AND a.aid = '{id}' GROUP BY s1.sid)
-
-                        GROUP BY p.pid, p.title, p.uid
-                        ORDER BY COUNT(s.sid)
+                        FROM playlists p, plinclude pl, perform pe
+                        WHERE pe.sid=pl.sid AND pl.pid=p.pid AND pe.aid = '{id}'
+                        GROUP BY p.title
+                        ORDER BY COUNT(pl.sid)
                         DESC LIMIT 3;''')
     
     playlistname = cursor.fetchall()
 
-    # cursor.execute("SELECT distinct u.name FROM users u, listen l, song s, perform p WHERE ")
-
-
     #create display page
     displayFrame = Frame(window, bg='gray', borderwidth=0)
     displayFrame.pack()
 
+    # Displays the playlists on the window
     for i in range(0, len(playlistname)):
         Label(displayFrame, bg='gray', text=playlistname[i][0], font=('Arial',15)).grid(row=i+1, column=0)
         Label(displayFrame, bg='gray', text=playlistname[i][1], font=('Arial',15)).grid(row=i+1, column=1)
-        # Label(displayFrame, text=playlistname[i][2], font=('Arial',15)).grid(row=i, column=2)
+        Label(displayFrame, bg='gray', text=playlistname[i][2], font=('Arial',15)).grid(row=i+1, column=2)
 
+    # This button is to return back to the artist page
     Button(displayFrame, bg='gray', text = "Return", font=('Arial', 15),  command=lambda: [clearFrame(displayFrame), artistPage()]).grid(row=5, column=0, padx = 15)
     
 
