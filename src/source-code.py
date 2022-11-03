@@ -131,8 +131,8 @@ def registerPage():
             cursor.execute("INSERT INTO users VALUES (?, ?, ?);", values)
             connection.commit()
             clearFrame(regFrame)
-            # go to the user page
-            userPage()
+            # go to the home page
+            home()
     
     # initiate variables to save the values of password and ID
     new_id = tkinter.StringVar()
@@ -939,7 +939,7 @@ def infoAboutSong(song,frame):
 
     playlistRows = cursor.fetchall()
     playlistString = ""
-    if playlistRows[0][0] == None: 
+    if playlistRows == None: 
         playlistString = "No Playlists"
     else:
         playlistString += "Playlists:\n"
@@ -1047,12 +1047,11 @@ def addSongToPlaylist(song,frame):
     ''', {"uid": id})
 
     playlistRows = cursor.fetchall()
-
     # We verify that there is at least one playlist assigned to the user, then create a button for each playlist
     if(playlistRows[0][0] != None):
         Label(addFrame, bg='gray', font=('Arial',15), text = "Add to existing playlist:").grid(row=0, column=1)
         for pRow in playlistRows:
-            #print(pRow[0])
+            #print(pRow)
             Button(addFrame, font=('Arial',15), bg='gray', text = pRow[1], command = lambda pRow = pRow: [insertSongIntoPlaylist(song, pRow[0])] ).grid(row=1+buttonIndex, column =1)
             buttonIndex += 1
 
