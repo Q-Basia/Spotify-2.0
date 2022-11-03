@@ -280,7 +280,7 @@ def userPage():
     Button(userFrame, text = "end session", fg='white', bg='red', command=lambda: endSession(), font=('Arial',15)).grid(row=10, column=0, pady=(20,0))
     
     # button to logout and exit the program
-    Button(userFrame, bg='gray', text = "logout", command=lambda: [endSession(), clearFrame(userFrame), home()], font=('Arial',15)).grid(row=11, column=0, pady=(20,0))
+    Button(userFrame, bg='gray', text = "logout", command=lambda: [endSession(), clearFrame(userFrame), reset(), home()], font=('Arial',15)).grid(row=11, column=0, pady=(20,0))
     Button(userFrame, bg='gray', text = "EXIT", font=('Arial',15), command=lambda: [endSession(), reset(), window.destroy()]).grid(row=12, column=0, pady=(20,0))
 
 def choose():
