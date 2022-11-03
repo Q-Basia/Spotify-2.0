@@ -1120,7 +1120,7 @@ def addSong(new_song):
     name = song[0]
     dur = song[1]
 
-    cursor.execute(f"SELECT title FROM songs WHERE title = ? AND duration = ?;", (name, dur))
+    cursor.execute("SELECT title FROM songs WHERE title = ? AND duration = ?;", (name, dur))
     row = cursor.fetchone()
     
     if not row:
