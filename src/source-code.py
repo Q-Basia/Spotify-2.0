@@ -1272,7 +1272,6 @@ def displayTopplaylists():
     for i in range(0, len(playlistname)):
         Label(displayFrame, bg='gray', text=playlistname[i][0], font=('Arial',15)).grid(row=i+1, column=0)
         Label(displayFrame, bg='gray', text=playlistname[i][1], font=('Arial',15)).grid(row=i+1, column=1)
-        Label(displayFrame, bg='gray', text=playlistname[i][2], font=('Arial',15)).grid(row=i+1, column=2)
 
     # This button is to return back to the artist page
     Button(displayFrame, bg='gray', text = "Return", font=('Arial', 15),  command=lambda: [clearFrame(displayFrame), artistPage()]).grid(row=5, column=0, padx = 15)
