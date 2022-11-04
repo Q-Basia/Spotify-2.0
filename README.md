@@ -1,5 +1,5 @@
 # Mini-Project-1
-This is our group Mini Project 1 : Spotify 2.0
+This is our group Mini Project 1 : **Spotify 2.0**
 
 -------------
 Contributors:
