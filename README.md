@@ -1,6 +1,13 @@
 # Mini-Project-1
 This is our group Mini Project 1 for CMPUT 291
 
+-------------
+Contributors:
+-------------
+- Basia
+- Adrien
+- Gabriel
+
 ------------
 Introduction
 ------------
