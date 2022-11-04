@@ -4,8 +4,8 @@ This is our group Mini Project 1 for CMPUT 291
 -------------
 Contributors:
 -------------
-- Basia
 - Adrien
+- Basia
 - Gabriel
 
 ------------
